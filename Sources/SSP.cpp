@@ -150,17 +150,17 @@ uint16_t SSP_t::TxRx_frame(uint16_t data, uint32_t deviceNum)
 
 	if((this->cselGpioArrPtr != (IODescription_t*)NULL) && (deviceNum < this->cselNum)){
 		Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT, this->cselGpioArrPtr[deviceNum].gpioPort, this->cselGpioArrPtr[deviceNum].gpioPin);
-		Chip_SSP_SendFrame(this->SSP_ptr[this->SSP_num], data);
-		Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT, this->cselGpioArrPtr[deviceNum].gpioPort, this->cselGpioArrPtr[deviceNum].gpioPin);
-	}
-	else{
-		Chip_SSP_SendFrame(this->SSP_ptr[this->SSP_num], data);
 	}
 	
-	for(i=0; i<50000; i++)
-	{
+	Chip_SSP_SendFrame(this->SSP_ptr[this->SSP_num], data);
+	for(i=0; i<50000; i++){
 		if(Chip_SSP_GetStatus(this->SSP_ptr[this->SSP_num], SSP_STAT_BSY) != SET) break;
 	}
+
+	if((this->cselGpioArrPtr != (IODescription_t*)NULL) && (deviceNum < this->cselNum)){
+		Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT, this->cselGpioArrPtr[deviceNum].gpioPort, this->cselGpioArrPtr[deviceNum].gpioPin);
+	}
+
 	return Chip_SSP_ReceiveFrame(this->SSP_ptr[this->SSP_num]);
 }
 
