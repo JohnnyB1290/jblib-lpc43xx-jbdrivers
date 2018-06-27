@@ -5,6 +5,8 @@
  *      Author: Stalker1290
  */
 
+#ifdef CORE_M4
+
 #include "chip.h"
 #include "IRQ_Controller.hpp"
 #ifdef CORE_LOAD_mesure
@@ -625,5 +627,5 @@ void QEI_IRQHandler(void)
 }
 #endif
 
-
+#endif
 
