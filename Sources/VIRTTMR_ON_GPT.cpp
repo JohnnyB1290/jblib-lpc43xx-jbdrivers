@@ -17,12 +17,25 @@ const uint32_t VIRT_GPT_TMR_t::INT_PRIOR[] = {TIMER0_interrupt_priority, TIMER1_
 #endif
 
 #ifdef CORE_M0
+
+#ifdef CORE_M0APP
 LPC_TIMER_T* VIRT_GPT_TMR_t::TMR_ptr[] = {LPC_TIMER0, LPC_TIMER0, LPC_TIMER3, LPC_TIMER3};
 const CHIP_RGU_RST_T VIRT_GPT_TMR_t::ResetNumber[] = {RGU_TIMER0_RST, RGU_TIMER0_RST, RGU_TIMER3_RST, RGU_TIMER3_RST};
 const CHIP_CCU_CLK_T VIRT_GPT_TMR_t::clk_num[] = {CLK_MX_TIMER0, CLK_MX_TIMER0, CLK_MX_TIMER3, CLK_MX_TIMER3};
 const IRQn_Type VIRT_GPT_TMR_t::GPT_IRQn[] = {TIMER0_IRQn, TIMER0_IRQn, TIMER3_IRQn, TIMER3_IRQn};
 const uint32_t VIRT_GPT_TMR_t::INT_PRIOR[] = {TIMER0_interrupt_priority, TIMER0_interrupt_priority, TIMER3_interrupt_priority,
 		TIMER3_interrupt_priority};
+#endif
+
+#ifdef CORE_M0SUB
+LPC_TIMER_T* VIRT_GPT_TMR_t::TMR_ptr[] = {LPC_TIMER1, LPC_TIMER1, LPC_TIMER2, LPC_TIMER};
+const CHIP_RGU_RST_T VIRT_GPT_TMR_t::ResetNumber[] = {RGU_TIMER1_RST, RGU_TIMER1_RST, RGU_TIMER2_RST, RGU_TIMER2_RST};
+const CHIP_CCU_CLK_T VIRT_GPT_TMR_t::clk_num[] = {CLK_MX_TIMER1, CLK_MX_TIMER1, CLK_MX_TIMER2, CLK_MX_TIMER2};
+const IRQn_Type VIRT_GPT_TMR_t::GPT_IRQn[] = {TIMER1_IRQn, TIMER1_IRQn, TIMER2_IRQn, TIMER2_IRQn};
+const uint32_t VIRT_GPT_TMR_t::INT_PRIOR[] = {TIMER1_interrupt_priority, TIMER1_interrupt_priority, TIMER2_interrupt_priority,
+		TIMER2_interrupt_priority};
+#endif
+
 #endif
 
 VIRT_GPT_TMR_t* VIRT_GPT_TMR_t::VIRT_GPT_TMR_ptrs[Num_of_main_timers][Num_of_sub_timers] = {
@@ -37,7 +50,14 @@ VIRT_GPT_TMR_t* VIRT_GPT_TMR_t::get_VIRT_GPT_Timer(uint8_t Main_tmr_num, uint8_t
 	if(Main_tmr_num < Num_of_main_timers)
 	{
 #ifdef CORE_M0
+#ifdef CORE_M0APP
 		if((Main_tmr_num!=0)&&(Main_tmr_num!=3)) return (VIRT_GPT_TMR_t*)NULL;
+#endif
+
+#ifdef CORE_M0APP
+		if((Main_tmr_num!=1)&&(Main_tmr_num!=2)) return (VIRT_GPT_TMR_t*)NULL;
+#endif
+
 #endif
 		if(Sub_tmr_num < Num_of_sub_timers)
 		{
