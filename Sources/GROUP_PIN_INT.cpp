@@ -73,7 +73,7 @@ void GroupPinInt_t::initialize(uint8_t mode){
 void GroupPinInt_t::addGPIO(uint8_t port, uint8_t pin, uint8_t gpioPort, uint8_t gpioPin, uint16_t scuMode, GroupPinIntSense_t sense){
 
 	Chip_SCU_PinMuxSet(port, pin, (SCU_MODE_INBUFF_EN |scuMode));
-	Chip_GPIO_SetPinDIRInput(LPC_GPIO_PORT, gpio_port, gpio_pin);
+	Chip_GPIO_SetPinDIRInput(LPC_GPIO_PORT, gpioPort, gpioPin);
 
 	switch (sense){
 	case LOW_LEVEL_GPOUP_PIN:
