@@ -16,11 +16,22 @@ const uint32_t PININT_t::INT_PRIOR[] = {PININT0_interrupt_priority, PININT1_inte
 #endif
 
 #ifdef CORE_M0
+
+#ifdef CORE_M0APP
 const IRQn_Type PININT_t::PININT_IRQn[] = {PIN_INT4_IRQn, PIN_INT4_IRQn, PIN_INT4_IRQn, PIN_INT4_IRQn,
 		PIN_INT4_IRQn, PIN_INT4_IRQn, PIN_INT4_IRQn, PIN_INT4_IRQn};
 const uint32_t PININT_t::INT_PRIOR[] = {PININT4_interrupt_priority, PININT4_interrupt_priority, PININT4_interrupt_priority,
 		PININT4_interrupt_priority, PININT4_interrupt_priority, PININT4_interrupt_priority, PININT4_interrupt_priority,
 		PININT4_interrupt_priority};
+#endif
+
+#ifdef CORE_M0SUB
+const IRQn_Type PININT_t::PININT_IRQn[] = {PIN_INT5_IRQn, PIN_INT5_IRQn, PIN_INT5_IRQn, PIN_INT5_IRQn,
+		PIN_INT5_IRQn, PIN_INT5_IRQn, PIN_INT5_IRQn, PIN_INT5_IRQn};
+const uint32_t PININT_t::INT_PRIOR[] = {PININT5_interrupt_priority, PININT5_interrupt_priority, PININT5_interrupt_priority,
+		PININT5_interrupt_priority, PININT5_interrupt_priority, PININT5_interrupt_priority, PININT5_interrupt_priority,
+		PININT5_interrupt_priority};
+#endif
 
 #endif
 
@@ -32,7 +43,12 @@ PININT_t* PININT_t::PINInt_ptrs[Num_of_pint_channels] = {(PININT_t*)NULL, (PININ
 PININT_t* PININT_t::get_PINInt(uint8_t pinint_num)
 {
 #ifdef CORE_M0
+#ifdef CORE_M0APP
 	if(pinint_num != 4) return (PININT_t*)NULL;
+#endif
+#ifdef CORE_M0SUB
+	if(pinint_num != 5) return (PININT_t*)NULL;
+#endif
 #endif
 	if(pinint_num < Num_of_pint_channels)
 	{

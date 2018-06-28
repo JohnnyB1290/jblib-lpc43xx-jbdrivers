@@ -17,12 +17,25 @@ const uint32_t GPTimer_t::INT_PRIOR[] = {TIMER0_interrupt_priority, TIMER1_inter
 #endif
 
 #ifdef CORE_M0
+
+#ifdef CORE_M0APP
 LPC_TIMER_T* GPTimer_t::TMR_ptr[] = {LPC_TIMER0, LPC_TIMER0, LPC_TIMER3, LPC_TIMER3};
 const CHIP_RGU_RST_T GPTimer_t::ResetNumber[] = {RGU_TIMER0_RST, RGU_TIMER0_RST, RGU_TIMER3_RST, RGU_TIMER3_RST};
 const CHIP_CCU_CLK_T GPTimer_t::clk_num[] = {CLK_MX_TIMER0, CLK_MX_TIMER0, CLK_MX_TIMER3, CLK_MX_TIMER3};
 const IRQn_Type GPTimer_t::GPT_IRQn[] = {TIMER0_IRQn, TIMER0_IRQn, TIMER3_IRQn, TIMER3_IRQn};
 const uint32_t GPTimer_t::INT_PRIOR[] = {TIMER0_interrupt_priority, TIMER0_interrupt_priority, TIMER3_interrupt_priority,
 		TIMER3_interrupt_priority};
+#endif
+
+#ifdef CORE_M0SUB
+LPC_TIMER_T* GPTimer_t::TMR_ptr[] = {LPC_TIMER1, LPC_TIMER1, LPC_TIMER2, LPC_TIMER2};
+const CHIP_RGU_RST_T GPTimer_t::ResetNumber[] = {RGU_TIMER1_RST, RGU_TIMER1_RST, RGU_TIMER2_RST, RGU_TIMER2_RST};
+const CHIP_CCU_CLK_T GPTimer_t::clk_num[] = {CLK_MX_TIMER1, CLK_MX_TIMER1, CLK_MX_TIMER2, CLK_MX_TIMER2};
+const IRQn_Type GPTimer_t::GPT_IRQn[] = {TIMER1_IRQn, TIMER1_IRQn, TIMER2_IRQn, TIMER2_IRQn};
+const uint32_t GPTimer_t::INT_PRIOR[] = {TIMER1_interrupt_priority, TIMER1_interrupt_priority, TIMER2_interrupt_priority,
+		TIMER2_interrupt_priority};
+#endif
+
 #endif
 
 GPTimer_t* GPTimer_t::GPTimer_ptrs[Num_of_timers] = {(GPTimer_t*)NULL, (GPTimer_t*)NULL, (GPTimer_t*)NULL, (GPTimer_t*)NULL};
@@ -32,7 +45,15 @@ GPTimer_t* GPTimer_t::get_GPTimer(uint8_t timer_num)
 	if(timer_num < Num_of_timers)
 	{
 #ifdef CORE_M0
+
+#ifdef CORE_M0APP
 		if((timer_num!=0)&&(timer_num!=3)) return (GPTimer_t*)NULL;
+#endif
+
+#ifdef CORE_M0SUB
+		if((timer_num!=1)&&(timer_num!=2)) return (GPTimer_t*)NULL;
+#endif
+
 #endif
 		if(GPTimer_ptrs[timer_num] == (GPTimer_t*)NULL) GPTimer_ptrs[timer_num] = new GPTimer_t(timer_num);
 		return GPTimer_ptrs[timer_num];
