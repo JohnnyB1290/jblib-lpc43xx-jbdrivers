@@ -135,9 +135,6 @@ void PININT_t::Disable_int(void)
 
 void PININT_t::Deinitialize(void)
 {
-	IRQ_CONTROLLER_t& IRQ_Control = IRQ_CONTROLLER_t::getIRQController();
-	IRQ_Control.Delete_Peripheral_IRQ_Listener(this);
-
 	NVIC_DisableIRQ(this->PININT_IRQn[this->pinint_num]);
 	NVIC_ClearPendingIRQ(this->PININT_IRQn[this->pinint_num]);
 	Chip_PININT_DisableIntLow(LPC_GPIO_PIN_INT, PININTCH(this->pinint_num));
