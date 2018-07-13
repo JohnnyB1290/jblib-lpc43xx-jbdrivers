@@ -19,11 +19,6 @@ static IRQ_CONTROLLER_t& Controller = IRQ_CONTROLLER_t::getIRQController();
 extern "C" {
 #endif
 
-void M0S_Reset_Handler(void){
-	Controller.HANDLE_Cortex_IRQ(Reset_IRQn);
-	while(1);
-}
-
 void M0S_NMI_Handler(void){
 	Controller.HANDLE_Cortex_IRQ(NonMaskableInt_IRQn);
 	while(1);
