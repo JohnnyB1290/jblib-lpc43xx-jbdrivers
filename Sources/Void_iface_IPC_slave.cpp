@@ -9,7 +9,7 @@
 #include "Void_iface_IPC_slave.hpp"
 
 
-Void_iface_IPC_slave_t::Void_iface_IPC_slave_t(uint8_t IFACE_IPX_ID,uint32_t rx_buf_size)
+Void_iface_IPC_slave_t::Void_iface_IPC_slave_t(uint8_t IFACE_IPX_ID,uint32_t rx_buf_size):IPC_listener_t(),void_channel_t()
 {
 	this->IFACE_IPX_ID = IFACE_IPX_ID;
 	this->setCode((uint64_t)1<<IFACE_IPX_ID);
