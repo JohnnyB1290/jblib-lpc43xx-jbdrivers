@@ -68,10 +68,16 @@ private:
 	void (*callback)(ipcex_msg_t*);
 };
 
+typedef enum{
+	CORE_M4_GATE = 0,
+	CORE_M0APP_GATE = 1,
+	CORE_M0SUB_GATE = 2,
+}ipcGate_t;
+
 class IPC_proto_t:protected IRQ_LISTENER_t
 {
 public:
-	static IPC_proto_t* get_IPC_proto(void);
+	static IPC_proto_t* get_IPC_proto(uint8_t gate);
     void Add_IPC_Listener(IPC_listener_t* listener);
     void Delete_IPC_Listener(IPC_listener_t* listener);
     int Qwr_msg_count(void);
@@ -79,15 +85,16 @@ public:
     int SetGblVal(int index, uint32_t val);
     uint32_t GetGblVal(int index);
 private:
-	IPC_proto_t(void);
-	static IPC_proto_t* IPC_proto_ptr;
+	IPC_proto_t(uint8_t gate);
+	static IPC_proto_t* IPC_proto_ptr[3];
     virtual void IRQ(int8_t IRQ_num);
-    static ipc_queue_t* qrd;
-    static ipc_queue_t* qwr;
+    ipc_queue_t* qrd;
+    ipc_queue_t* qwr;
     ipcex_msg_t ipcex_queue[IPCEX_QUEUE_SZ];
     uint32_t gblval[IPCEX_MAX_GBLVAL];
     IPC_listener_t* ipcex_listeners[IPC_Listeners_num];
-
+    void (*ClearTXEvent)(void);
+    IRQn_Type IPC_IRQn;
 };
 
 #endif /* IPC_HPP_ */

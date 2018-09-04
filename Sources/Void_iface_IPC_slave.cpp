@@ -9,21 +9,22 @@
 #include "Void_iface_IPC_slave.hpp"
 
 
-Void_iface_IPC_slave_t::Void_iface_IPC_slave_t(uint8_t IFACE_IPX_ID,uint32_t rx_buf_size)
+Void_iface_IPC_slave_t::Void_iface_IPC_slave_t(uint8_t gate,uint8_t IFACE_IPX_ID,uint32_t rx_buf_size):IPC_listener_t(),void_channel_t()
 {
 	this->IFACE_IPX_ID = IFACE_IPX_ID;
 	this->setCode((uint64_t)1<<IFACE_IPX_ID);
 	this->rx_buf_size = rx_buf_size;
-	this->rx_buf_ptr = (uint8_t*)malloc(this->rx_buf_size);
+	this->rx_buf_ptr = (uint8_t*)malloc_s(this->rx_buf_size);
 	this->call_interface_ptr = (Channel_Call_Interface_t*)NULL;
-	IPC_proto_t::get_IPC_proto()->Add_IPC_Listener(this);
+	this->ipcProtoPtr = IPC_proto_t::get_IPC_proto(gate);
+	this->ipcProtoPtr->Add_IPC_Listener(this);
 }
 
 Void_iface_IPC_slave_t::~Void_iface_IPC_slave_t(void)
 {
 	delete this->Tx_ring_buf_ptr;
-	free(this->rx_buf_ptr);
-	free(this->tx_buf_ptr);
+	free_s(this->rx_buf_ptr);
+	free_s(this->tx_buf_ptr);
 }
 
 void Void_iface_IPC_slave_t::Initialize(void* (*mem_alloc)(size_t),uint16_t tx_buf_size, Channel_Call_Interface_t* call_interface_ptr)
@@ -34,13 +35,13 @@ void Void_iface_IPC_slave_t::Initialize(void* (*mem_alloc)(size_t),uint16_t tx_b
 	this->call_interface_ptr = call_interface_ptr;
 	this->ini_msg.msg_type = Initialize_enum;
 	this->ini_msg.tx_buf_size = tx_buf_size;
-	IPC_proto_t::get_IPC_proto()->MsgPush(this->IFACE_IPX_ID,(uint32_t)&this->ini_msg);
+	this->ipcProtoPtr->MsgPush(this->IFACE_IPX_ID,(uint32_t)&this->ini_msg);
 }
 
 void Void_iface_IPC_slave_t::DEInitialize(void)
 {
 	this->deini_msg.msg_type = DEInitialize_enum;
-	IPC_proto_t::get_IPC_proto()->MsgPush(this->IFACE_IPX_ID,(uint32_t)&this->deini_msg);
+	this->ipcProtoPtr->MsgPush(this->IFACE_IPX_ID,(uint32_t)&this->deini_msg);
 }
 
 void Void_iface_IPC_slave_t::Tx(uint8_t *mes,uint16_t m_size,void* param)
@@ -48,7 +49,7 @@ void Void_iface_IPC_slave_t::Tx(uint8_t *mes,uint16_t m_size,void* param)
 	this->Tx_ring_buf_ptr->InsertMult(mes,m_size);
 	this->tx_rx_msg.msg_type = Tx_enum;
 	this->tx_rx_msg.ring_buf_ptr = this->Tx_ring_buf_ptr;
-	IPC_proto_t::get_IPC_proto()->MsgPush(this->IFACE_IPX_ID,(uint32_t)&this->tx_rx_msg);
+	this->ipcProtoPtr->MsgPush(this->IFACE_IPX_ID,(uint32_t)&this->tx_rx_msg);
 }
 
 void Void_iface_IPC_slave_t::GetParameter(uint8_t ParamName, void* ParamValue)
