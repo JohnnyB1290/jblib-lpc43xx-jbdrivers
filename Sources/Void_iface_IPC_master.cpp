@@ -17,7 +17,7 @@ Void_iface_IPC_master_t::Void_iface_IPC_master_t(uint8_t gate,void_channel_t* Ch
 	if(this->Channel_ptr != (void_channel_t*)NULL)
 	{
 		this->setCode((uint64_t)1<<IFACE_IPX_ID);
-		this->rx_buf_ptr = (uint8_t*)malloc(this->rx_buf_size);
+		this->rx_buf_ptr = (uint8_t*)malloc_s(this->rx_buf_size);
 		this->Rx_ring_buf_ptr = new ring_buf_t((void*)this->rx_buf_ptr, 1, this->rx_buf_size);
 		this->ipcProtoPtr = IPC_proto_t::get_IPC_proto(gate);
 		this->ipcProtoPtr->Add_IPC_Listener(this);
@@ -30,9 +30,9 @@ Void_iface_IPC_master_t::~Void_iface_IPC_master_t(void)
 	if(this->Channel_ptr != (void_channel_t*)NULL)
 	{
 		this->Channel_ptr->DEInitialize();
-		free(this->rx_buf_ptr);
+		free_s(this->rx_buf_ptr);
 		delete this->Rx_ring_buf_ptr;
-		free(this->tx_buf_ptr);
+		free_s(this->tx_buf_ptr);
 	}
 }
 

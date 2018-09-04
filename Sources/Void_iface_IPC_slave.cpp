@@ -14,7 +14,7 @@ Void_iface_IPC_slave_t::Void_iface_IPC_slave_t(uint8_t gate,uint8_t IFACE_IPX_ID
 	this->IFACE_IPX_ID = IFACE_IPX_ID;
 	this->setCode((uint64_t)1<<IFACE_IPX_ID);
 	this->rx_buf_size = rx_buf_size;
-	this->rx_buf_ptr = (uint8_t*)malloc(this->rx_buf_size);
+	this->rx_buf_ptr = (uint8_t*)malloc_s(this->rx_buf_size);
 	this->call_interface_ptr = (Channel_Call_Interface_t*)NULL;
 	this->ipcProtoPtr = IPC_proto_t::get_IPC_proto(gate);
 	this->ipcProtoPtr->Add_IPC_Listener(this);
@@ -23,8 +23,8 @@ Void_iface_IPC_slave_t::Void_iface_IPC_slave_t(uint8_t gate,uint8_t IFACE_IPX_ID
 Void_iface_IPC_slave_t::~Void_iface_IPC_slave_t(void)
 {
 	delete this->Tx_ring_buf_ptr;
-	free(this->rx_buf_ptr);
-	free(this->tx_buf_ptr);
+	free_s(this->rx_buf_ptr);
+	free_s(this->tx_buf_ptr);
 }
 
 void Void_iface_IPC_slave_t::Initialize(void* (*mem_alloc)(size_t),uint16_t tx_buf_size, Channel_Call_Interface_t* call_interface_ptr)
