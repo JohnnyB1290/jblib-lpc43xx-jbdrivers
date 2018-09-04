@@ -8,7 +8,8 @@
 #include "Void_iface_IPC_master.hpp"
 #include "stdlib.h"
 
-Void_iface_IPC_master_t::Void_iface_IPC_master_t(void_channel_t* Channel_ptr, uint8_t IFACE_IPX_ID, uint32_t rx_buf_size):IPC_listener_t(),Channel_Call_Interface_t()
+Void_iface_IPC_master_t::Void_iface_IPC_master_t(uint8_t gate,void_channel_t* Channel_ptr,
+		uint8_t IFACE_IPX_ID, uint32_t rx_buf_size):IPC_listener_t(),Channel_Call_Interface_t()
 {
 	this->Channel_ptr = Channel_ptr;
 	this->IFACE_IPX_ID = IFACE_IPX_ID;
@@ -18,7 +19,8 @@ Void_iface_IPC_master_t::Void_iface_IPC_master_t(void_channel_t* Channel_ptr, ui
 		this->setCode((uint64_t)1<<IFACE_IPX_ID);
 		this->rx_buf_ptr = (uint8_t*)malloc(this->rx_buf_size);
 		this->Rx_ring_buf_ptr = new ring_buf_t((void*)this->rx_buf_ptr, 1, this->rx_buf_size);
-		IPC_proto_t::get_IPC_proto()->Add_IPC_Listener(this);
+		this->ipcProtoPtr = IPC_proto_t::get_IPC_proto(gate);
+		this->ipcProtoPtr->Add_IPC_Listener(this);
 	}
 
 }
@@ -39,7 +41,7 @@ void Void_iface_IPC_master_t::channel_callback(uint8_t *mes,uint16_t m_size,void
 	this->Rx_ring_buf_ptr->InsertMult(mes,m_size);
 	this->rx_call_msg.msg_type = Rx_call_enum;
 	this->rx_call_msg.ring_buf_ptr = this->Rx_ring_buf_ptr;
-	IPC_proto_t::get_IPC_proto()->MsgPush(this->IFACE_IPX_ID, (uint32_t)&this->rx_call_msg);
+	this->ipcProtoPtr->MsgPush(this->IFACE_IPX_ID, (uint32_t)&this->rx_call_msg);
 }
 
 void Void_iface_IPC_master_t::IPC_MSG_HANDLER(ipcex_msg_t* msg)

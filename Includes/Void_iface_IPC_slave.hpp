@@ -16,7 +16,7 @@
 class Void_iface_IPC_slave_t:protected IPC_listener_t, public void_channel_t
 {
 public:
-	Void_iface_IPC_slave_t(uint8_t IFACE_IPX_ID,uint32_t rx_buf_size);
+	Void_iface_IPC_slave_t(uint8_t gate,uint8_t IFACE_IPX_ID,uint32_t rx_buf_size);
 	virtual ~Void_iface_IPC_slave_t(void);
 	virtual void Initialize(void* (*mem_alloc)(size_t),uint16_t tx_buf_size, Channel_Call_Interface_t* call_interface_ptr);
 	virtual void DEInitialize(void);
@@ -35,6 +35,7 @@ private:
 	uint32_t rx_buf_size;
 	uint8_t* rx_buf_ptr;
 	Channel_Call_Interface_t* call_interface_ptr;
+	IPC_proto_t* ipcProtoPtr;
 };
 
 #endif /* VOID_IFACE_IPC_SLAVE_HPP_ */
