@@ -94,7 +94,7 @@ private:
     uint32_t gblval[IPCEX_MAX_GBLVAL];
     IPC_listener_t* ipcex_listeners[IPC_Listeners_num];
     void (*ClearTXEvent)(void);
-    LPC43XX_IRQn_Type IPC_IRQn;
+    IRQn_Type IPC_IRQn;
 };
 
 #endif /* IPC_HPP_ */
