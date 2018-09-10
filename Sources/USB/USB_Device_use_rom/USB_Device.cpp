@@ -38,8 +38,6 @@ USB_Device_t::USB_Device_t(uint8_t num):IRQ_LISTENER_t(),Callback_Interface_t()
 
 	if(num == 0) this->setCode((uint64_t)1<<USB0_IRQn);
 	if(num == 1) this->setCode((uint64_t)1<<USB1_IRQn);
-	IRQ_CONTROLLER_t& IRQ_Control = IRQ_CONTROLLER_t::getIRQController();
-	IRQ_Control.Add_Peripheral_IRQ_Listener(this);
 }
 
 
@@ -65,6 +63,21 @@ void USB_Device_t::Connect(void)
 
 void USB_Device_t::Reset(void)
 {
+	CONTROLLER_t::get_CONTROLLER()->Delete_main_procedure(this);
+	IRQ_CONTROLLER_t& IRQ_Control = IRQ_CONTROLLER_t::getIRQController();
+	IRQ_Control.Delete_Peripheral_IRQ_Listener(this);
+
+	if(this->num == 0)
+	{
+		NVIC_DisableIRQ(USB0_IRQn);
+		NVIC_ClearPendingIRQ(USB0_IRQn);
+	}
+	else if(this->num == 1)
+	{
+		NVIC_DisableIRQ(USB1_IRQn);
+		NVIC_ClearPendingIRQ(USB1_IRQn);
+	}
+
 	USB_Device_t::g_pUsbApi->hw->Reset(this->g_hUsb);
 }
 
@@ -256,6 +269,9 @@ void USB_Device_t::Initialize(USB_Devices_module_t** modules_buf_ptr,uint8_t num
 			#endif
 		}
 	}
+
+	IRQ_CONTROLLER_t& IRQ_Control = IRQ_CONTROLLER_t::getIRQController();
+	IRQ_Control.Add_Peripheral_IRQ_Listener(this);
 
 	if(this->num == 0)
 	{

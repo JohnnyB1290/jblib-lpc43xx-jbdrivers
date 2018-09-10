@@ -155,7 +155,7 @@ void RNDIS_device_module_t::USB_Tasks(void)
 
 	if (this->ResponseReady)
 	{
-		USB_Request_Header_t Notification;
+		MY_USB_Request_Header_t Notification;
 		Notification.bmRequestType = ((1 << 7)/*REQDIR_DEVICETOHOST*/ | (1 << 5)/*REQTYPE_CLASS*/ | (1 << 0)/*REQREC_INTERFACE*/);
 		Notification.bRequest      = RNDIS_NOTIF_ResponseAvailable;
 		Notification.wValue        = 0;
@@ -166,13 +166,13 @@ void RNDIS_device_module_t::USB_Tasks(void)
 		if(this->USB_num == 0)
 		{
 			NVIC_DisableIRQ(USB0_IRQn);
-			RNDIS_device_module_t::g_pUsbApi->hw->WriteEP(this->l_hUsb, USB0_RNDIS_INT_EP, (uint8_t *)&Notification, sizeof(USB_Request_Header_t));
+			RNDIS_device_module_t::g_pUsbApi->hw->WriteEP(this->l_hUsb, USB0_RNDIS_INT_EP, (uint8_t *)&Notification, sizeof(MY_USB_Request_Header_t));
 			NVIC_EnableIRQ(USB0_IRQn);
 		}
 		if(this->USB_num == 1)
 		{
 			NVIC_DisableIRQ(USB1_IRQn);
-			RNDIS_device_module_t::g_pUsbApi->hw->WriteEP(this->l_hUsb, USB1_RNDIS_INT_EP, (uint8_t *)&Notification, sizeof(USB_Request_Header_t));
+			RNDIS_device_module_t::g_pUsbApi->hw->WriteEP(this->l_hUsb, USB1_RNDIS_INT_EP, (uint8_t *)&Notification, sizeof(MY_USB_Request_Header_t));
 			NVIC_EnableIRQ(USB1_IRQn);
 		}
 		this->ResponseReady = false;
