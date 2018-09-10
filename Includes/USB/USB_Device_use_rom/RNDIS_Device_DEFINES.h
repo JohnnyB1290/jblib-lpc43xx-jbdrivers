@@ -374,7 +374,7 @@ extern "C" {
 		uint16_t wValue; /**< wValue parameter of the request. */
 		uint16_t wIndex; /**< wIndex parameter of the request. */
 		uint16_t wLength; /**< Length of the data to transfer in bytes. */
-	} USB_Request_Header_t;
+	} MY_USB_Request_Header_t;
 #pragma pack(pop)
 
 #pragma pack(push, 4)
