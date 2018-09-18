@@ -151,5 +151,14 @@ NVMParamsHeader_t* NVMParameters_t::getHeaderPtr(void){
 	return NVMParameters_t::paramsHeaderPtr;
 }
 
+uint32_t NVMParameters_t::getParametersSize(void){
+	return (NVMParameters_t::paramsHeaderSize +
+			NVMParameters_t::paramsCellSize * NVMParameters_t::paramsHeaderPtr->size);
+}
 
+void NVMParameters_t::setAllParameters(void* ptr){
+	EEPROM_t::getEEPROM().Write((uint32_t)NVMParameters_t::paramsHeaderPtr,
+			(uint8_t*)ptr,NVMParameters_t::paramsHeaderSize +
+			NVMParameters_t::paramsCellSize * ((NVMParamsHeader_t*)ptr)->size);
+}
 

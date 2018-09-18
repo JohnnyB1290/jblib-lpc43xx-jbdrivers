@@ -62,6 +62,8 @@ public:
 	void deleteParameter(char* paramDescription);
 	void eraseAllParameters(void);
 	NVMParamsHeader_t* getHeaderPtr(void);
+	uint32_t getParametersSize(void);
+	void setAllParameters(void* ptr);
 private:
 	NVMParameters_t(void);
 
