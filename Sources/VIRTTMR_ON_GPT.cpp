@@ -54,7 +54,7 @@ VIRT_GPT_TMR_t* VIRT_GPT_TMR_t::get_VIRT_GPT_Timer(uint8_t Main_tmr_num, uint8_t
 		if((Main_tmr_num!=0)&&(Main_tmr_num!=3)) return (VIRT_GPT_TMR_t*)NULL;
 #endif
 
-#ifdef CORE_M0APP
+#ifdef CORE_M0SUB
 		if((Main_tmr_num!=1)&&(Main_tmr_num!=2)) return (VIRT_GPT_TMR_t*)NULL;
 #endif
 
