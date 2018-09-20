@@ -162,3 +162,36 @@ void NVMParameters_t::setAllParameters(void* ptr){
 			NVMParameters_t::paramsCellSize * ((NVMParamsHeader_t*)ptr)->size);
 }
 
+
+uint32_t NVMParameters_t::getCompressedParametersSize(void){
+
+	uint32_t retSize = NVMParameters_t::paramsHeaderSize;
+	NVMParamsCell_t* cellPtr = (NVMParamsCell_t*)(NVMParameters_t::baseAddr + NVMParameters_t::paramsHeaderSize);
+
+	for(uint8_t i = 0; i < NVMParameters_t::paramsHeaderPtr->size; i++){
+		retSize += 4 + cellPtr->descriptionSize + cellPtr->dataSize;
+		cellPtr++;
+	}
+	return retSize;
+}
+
+uint32_t NVMParameters_t::getCompressedParameters(uint8_t* buf){
+
+	uint32_t retSize = NVMParameters_t::paramsHeaderSize;
+	uint8_t* ptr = buf;
+	NVMParamsCell_t* cellPtr = (NVMParamsCell_t*)(NVMParameters_t::baseAddr + NVMParameters_t::paramsHeaderSize);
+
+	memcpy(ptr,(uint8_t*)NVMParameters_t::paramsHeaderPtr, NVMParameters_t::paramsHeaderSize);
+	ptr += NVMParameters_t::paramsHeaderSize;
+
+	for(uint8_t i = 0; i < NVMParameters_t::paramsHeaderPtr->size; i++){
+
+		retSize += 4 + cellPtr->descriptionSize + cellPtr->dataSize;
+		memcpy(ptr,(uint8_t*)cellPtr, 4 + cellPtr->descriptionSize);
+		ptr += (4 + cellPtr->descriptionSize);
+		memcpy(ptr,((uint8_t*)cellPtr) + 4 + sizeof(cellPtr->description), cellPtr->dataSize);
+		ptr += cellPtr->dataSize;
+		cellPtr++;
+	}
+	return retSize;
+}

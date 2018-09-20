@@ -41,14 +41,12 @@ typedef enum{
 	nvmParamTypeU8 = 0,
 	nvmParamTypeU16 = 1,
 	nvmParamTypeU32 = 2,
-	nvmParamTypeU64 = 3,
-	nvmParamTypeString = 4,
-	nvmParamTypeFloat = 5,
-	nvmParamTypeDouble = 6,
-	nvmParamTypeI8 = 7,
-	nvmParamTypeI16 = 8,
-	nvmParamTypeI32 = 9,
-	nvmParamTypeI64 = 10,
+	nvmParamTypeString = 3,
+	nvmParamTypeFloat = 4,
+	nvmParamTypeDouble = 5,
+	nvmParamTypeI8 = 6,
+	nvmParamTypeI16 = 7,
+	nvmParamTypeI32 = 8,
 }nmvParamsCellType_t;
 
 
@@ -64,6 +62,8 @@ public:
 	NVMParamsHeader_t* getHeaderPtr(void);
 	uint32_t getParametersSize(void);
 	void setAllParameters(void* ptr);
+	uint32_t getCompressedParametersSize(void);
+	uint32_t getCompressedParameters(uint8_t* buf);
 private:
 	NVMParameters_t(void);
 
