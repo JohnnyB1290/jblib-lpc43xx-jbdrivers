@@ -42,11 +42,10 @@ typedef enum{
 	nvmParamTypeU16 = 1,
 	nvmParamTypeU32 = 2,
 	nvmParamTypeString = 3,
-	nvmParamTypeFloat = 4,
-	nvmParamTypeDouble = 5,
-	nvmParamTypeI8 = 6,
-	nvmParamTypeI16 = 7,
-	nvmParamTypeI32 = 8,
+	nvmParamTypeDouble = 4,
+	nvmParamTypeI8 = 5,
+	nvmParamTypeI16 = 6,
+	nvmParamTypeI32 = 7,
 }nmvParamsCellType_t;
 
 
