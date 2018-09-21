@@ -209,6 +209,16 @@ int IPC_proto_t::Qwr_msg_count(void)
 int IPC_proto_t::MsgPush(uint32_t id, uint32_t data)
 {
 	ipcex_msg_t msg;
+#ifdef CORE_M4
+	msg.sender = CORE_M4_GATE;
+#endif
+#ifdef CORE_M0APP
+	msg.sender = CORE_M0APP_GATE;
+#endif
+#ifdef CORE_M0SUB
+	msg.sender = CORE_M0SUB_GATE;
+#endif
+
 	msg.id = id;
 	msg.data = data;
 

@@ -38,10 +38,15 @@ typedef struct ipc_queue_struct {
 #define QUEUE_IS_EMPTY(q)   ((q)->head == (q)->tail)
 #define QUEUE_IS_VALID(q)   ((q)->valid == QUEUE_MAGIC_VALID)
 
+#pragma pack(push, 1)
+
 typedef struct __ipcex_msg {
+	uint8_t sender;
 	uint32_t id;
 	uint32_t data;
 } ipcex_msg_t;
+
+#pragma pack(pop)
 
 class IPC_listener_t
 {
