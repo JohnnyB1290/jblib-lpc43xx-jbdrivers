@@ -624,6 +624,7 @@ void RNDIS_device_module_t::ProcessRNDISControlMessage(void)
 	switch (this->MessageHeader->MessageType)
 	{
 		case REMOTE_NDIS_INITIALIZE_MSG:
+		{
 			/* Initialize the adapter - return information about the supported RNDIS version and buffer sizes */
 
 			this->ResponseReady = true;
@@ -668,7 +669,9 @@ void RNDIS_device_module_t::ProcessRNDISControlMessage(void)
 			this->CurrRNDISState = RNDIS_Initialized;
 
 			break;
+		}
 		case REMOTE_NDIS_HALT_MSG:
+		{
 			/* Halt the adapter, reset the adapter state - note that no response should be returned when completed */
 
 			this->ResponseReady = false;
@@ -677,7 +680,9 @@ void RNDIS_device_module_t::ProcessRNDISControlMessage(void)
 			this->CurrRNDISState = RNDIS_Uninitialized;
 
 			break;
+		}
 		case REMOTE_NDIS_QUERY_MSG:
+		{
 			/* Request for information about a parameter about the adapter, specified as an OID token */
 
 			this->ResponseReady = true;
@@ -710,7 +715,9 @@ void RNDIS_device_module_t::ProcessRNDISControlMessage(void)
 			}
 
 			break;
+		}
 		case REMOTE_NDIS_SET_MSG:
+		{
 			/* Request to set a parameter of the adapter, specified as an OID token */
 
 			this->ResponseReady = true;
@@ -731,7 +738,9 @@ void RNDIS_device_module_t::ProcessRNDISControlMessage(void)
 			  SET_Response->Status = REMOTE_NDIS_STATUS_NOT_SUPPORTED;
 
 			break;
+		}
 		case REMOTE_NDIS_RESET_MSG:
+		{
 			/* Soft reset the adapter */
 
 			this->Rx_packet_counter = 0;
@@ -766,7 +775,9 @@ void RNDIS_device_module_t::ProcessRNDISControlMessage(void)
 			RESET_Response->AddressingReset     = 0;
 
 			break;
+		}
 		case REMOTE_NDIS_KEEPALIVE_MSG:
+		{
 			/* Keep alive message sent to the adapter every 5 seconds when idle to ensure it is still responding */
 			this->ResponseReady = true;
 
@@ -779,6 +790,7 @@ void RNDIS_device_module_t::ProcessRNDISControlMessage(void)
 			KEEPALIVE_Response->Status          = REMOTE_NDIS_STATUS_SUCCESS;
 
 			break;
+		}
 	}
 }
 
