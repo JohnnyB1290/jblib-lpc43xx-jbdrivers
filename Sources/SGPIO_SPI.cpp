@@ -27,27 +27,6 @@ uint8_t SGPIO_SPI_t::reverseBitsInByteTable[] = {
  0x0F, 0x8F, 0x4F, 0xCF, 0x2F, 0xAF, 0x6F, 0xEF, 0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF
 };
 
-/******************************************************************************
-* SLICE P is used to generate a NSS
-******************************************************************************/
-SgpioSliceCfg SGPIO_SPI_t::NSS_CFG = {P, SGPIO_OUTPUT_PIN, SGPIO_15};
-
-/******************************************************************************
-* SLICE N is used to transmit the data for MASTER 0
-******************************************************************************/
-SgpioSliceCfg SGPIO_SPI_t::DATA_OUT_CFG = {N, SGPIO_OUTPUT_PIN, SGPIO_11};
-
-/******************************************************************************
-* SLICE G is used to receive the data for MASTER 0
-******************************************************************************/
-SgpioSliceCfg SGPIO_SPI_t::DATA_IN_CFG = {G, SGPIO_INPUT_PIN, SGPIO_10};
-
-/******************************************************************************
-* SLICE D is used to generate a clock signal
-* the configuration is the same for each SPI mode
-******************************************************************************/
-SgpioSliceCfg SGPIO_SPI_t::CLOCK_CFG = {D, SGPIO_OUTPUT_PIN, SGPIO_12};
-
 SGPIO_SPI_t* SGPIO_SPI_t::SGPIO_SPI_ptr = (SGPIO_SPI_t*)NULL;
 
 SGPIO_SPI_t* SGPIO_SPI_t::getSGPIOspi(void){
@@ -72,20 +51,18 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 
 	Chip_SCU_PinMuxSet(SGPIO_SPI_MOSI_PORT, SGPIO_SPI_MOSI_PIN, (SCU_MODE_PULLUP | SGPIO_SPI_MOSI_SCU_FUNC)); /*  MOSI */
 	Chip_SCU_PinMuxSet(SGPIO_SPI_MISO_PORT, SGPIO_SPI_MISO_PIN, (SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SGPIO_SPI_MISO_SCU_FUNC)); /* MISO */
-	Chip_SCU_PinMuxSet(SGPIO_SPI_SCK_PORT, SGPIO_SPI_SCK_PIN, (SCU_MODE_PULLUP | SCU_MODE_20MA_DRIVESTR | SCU_MODE_INBUFF_EN | SGPIO_SPI_SCK_SCU_FUNC)); /* SCK */
+	Chip_SCU_PinMuxSet(SGPIO_SPI_SCK_PORT, SGPIO_SPI_SCK_PIN, (SCU_MODE_PULLUP | SCU_MODE_INBUFF_EN | SGPIO_SPI_SCK_SCU_FUNC)); /* SCK */
 	Chip_SCU_PinMuxSet(SGPIO_SPI_SSEL_PORT, SGPIO_SPI_SSEL_PIN, (SCU_MODE_PULLUP  | SGPIO_SPI_SSEL_SCU_FUNC)); /* NSS */
 
-
-	this->masterMask = ((1U << CLOCK_CFG.sliceId)|\
-					(1U << DATA_OUT_CFG.sliceId)|\
-					(1U << DATA_IN_CFG.sliceId)/*|\
-					(1U << NSS_CFG.sliceId)*/);
+	this->masterMask = ((1U << SGPIO_SPI_SCK_SLICE_ID)|\
+					(1U << SGPIO_SPI_MOSI_SLICE_ID)|\
+					(1U << SGPIO_SPI_MISO_SLICE_ID));
 
 	/**********************************************************************
 	* make the static configuration for the Clock, slice D
 	*
 	**********************************************************************/
-	SGPIO_disableSlice(CLOCK_CFG.sliceId);
+	SGPIO_disableSlice(SGPIO_SPI_SCK_SLICE_ID);
 
 	sliceMuxCfg = SGPIO_makeSliceMuxConfig(
 		SMC_MATCH_DATA,
@@ -97,7 +74,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		SMC_INVQUAL_INVERTED
 		);
 
-	SGPIO_configSliceMuxReg(CLOCK_CFG.sliceId, sliceMuxCfg);
+	SGPIO_configSliceMuxReg(SGPIO_SPI_SCK_SLICE_ID, sliceMuxCfg);
 
 	muxCfg = SGPIO_makeMuxConfig(
 		MC_CLK_DONTCARE,
@@ -109,26 +86,24 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		MC_CONCAT_DATA,
 		MC_CONCAT_SELF_LOOP);
 
-
-	SGPIO_configMuxReg(CLOCK_CFG.sliceId, muxCfg);
+	SGPIO_configMuxReg(SGPIO_SPI_SCK_SLICE_ID, muxCfg);
 
 	outMuxCfg = SGPIO_makeOutMuxConfig(OMC_DOUTM1, OMC_GPIO_OE);
-	SGPIO_configOutMuxReg(CLOCK_CFG.pinId, outMuxCfg);
-	if(CLOCK_CFG.sliceFunc == SGPIO_OUTPUT_PIN)
-		SGPIO_setOeReg(CLOCK_CFG.pinId, outMuxCfg);
+	SGPIO_configOutMuxReg(SGPIO_SPI_SCK_PIN_ID, outMuxCfg);
+	if(SGPIO_SPI_SCK_SLICE_FUNC == SGPIO_OUTPUT_PIN)
+		SGPIO_setOeReg(SGPIO_SPI_SCK_PIN_ID, outMuxCfg);
 
-	SGPIO_setBitCountReg(CLOCK_CFG.sliceId, (DBIT_8)*2);
-	SGPIO_setCountReloadReg(CLOCK_CFG.sliceId, this->sgpioClockHz/(2*bitrate));
-	SGPIO_writeDataReg(CLOCK_CFG.sliceId, 0xAAAAAAAA);
+	SGPIO_setBitCountReg(SGPIO_SPI_SCK_SLICE_ID, 16);
+	SGPIO_setCountReloadReg(SGPIO_SPI_SCK_SLICE_ID, this->sgpioClockHz/(2*bitrate));
+	SGPIO_writeDataReg(SGPIO_SPI_SCK_SLICE_ID, 0xAAAAAAAA);
 
 	/**********************************************************************
 	* make the static configuration for the Data out pin, slice N
 	*
 	**********************************************************************/
-	SGPIO_disableSlice(DATA_OUT_CFG.sliceId);
+	SGPIO_disableSlice(SGPIO_SPI_MOSI_SLICE_ID);
 
 		sliceMuxCfg = SGPIO_makeSliceMuxConfig(
-		//SMC_DONT_MATCH,
 		SMC_MATCH_DATA,
 		SMC_CLKCAP_FALLING,
 		SMC_CLKGEN_COUNTER,
@@ -138,7 +113,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		SMC_INVQUAL_INVERTED
 		);
 
-	SGPIO_configSliceMuxReg(DATA_OUT_CFG.sliceId, sliceMuxCfg);
+	SGPIO_configSliceMuxReg(SGPIO_SPI_MOSI_SLICE_ID, sliceMuxCfg);
 
 	muxCfg = SGPIO_makeMuxConfig(
 		MC_CLK_INTERNAL,
@@ -151,28 +126,26 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		MC_CONCAT_ORDER_DONTCARE
 		);
 
-	SGPIO_configMuxReg(DATA_OUT_CFG.sliceId, muxCfg);
+	SGPIO_configMuxReg(SGPIO_SPI_MOSI_SLICE_ID, muxCfg);
 
 	outMuxCfg = SGPIO_makeOutMuxConfig(OMC_DOUTM1, OMC_GPIO_OE);
-	//outMuxCfg = SGPIO_makeOutMuxConfig(OMC_CLKOUT, OMC_GPIO_OE);
 
-	SGPIO_configOutMuxReg(DATA_OUT_CFG.pinId, outMuxCfg);
-	if(DATA_OUT_CFG.sliceFunc == SGPIO_OUTPUT_PIN)
-		SGPIO_setOeReg(DATA_OUT_CFG.pinId, outMuxCfg);
+	SGPIO_configOutMuxReg(SGPIO_SPI_MOSI_PIN_ID, outMuxCfg);
+	if(SGPIO_SPI_MOSI_SLICE_FUNC == SGPIO_OUTPUT_PIN)
+		SGPIO_setOeReg(SGPIO_SPI_MOSI_PIN_ID, outMuxCfg);
 
-	SGPIO_setBitCountReg(DATA_OUT_CFG.sliceId, DBIT_8);
-	SGPIO_setCountReloadReg(DATA_OUT_CFG.sliceId, this->sgpioClockHz/bitrate);
-	SGPIO_writeDataReg(DATA_OUT_CFG.sliceId, 0x0);
-	SGPIO_writeDataShadowReg(DATA_OUT_CFG.sliceId, 0x0);
+	SGPIO_setBitCountReg(SGPIO_SPI_MOSI_SLICE_ID, 8);
+	SGPIO_setCountReloadReg(SGPIO_SPI_MOSI_SLICE_ID, this->sgpioClockHz/bitrate);
+	SGPIO_writeDataReg(SGPIO_SPI_MOSI_SLICE_ID, 0x0);
+	SGPIO_writeDataShadowReg(SGPIO_SPI_MOSI_SLICE_ID, 0x0);
 
 	/**********************************************************************
 	* make the static configuration for the Data in pin, slice G
 	*
 	**********************************************************************/
-	SGPIO_disableSlice(DATA_IN_CFG.sliceId);
+	SGPIO_disableSlice(SGPIO_SPI_MISO_SLICE_ID);
 
 	sliceMuxCfg = SGPIO_makeSliceMuxConfig(
-		//SMC_DONT_MATCH,
 		SMC_MATCH_DATA,
 		SMC_CLKCAP_RISING,
 		SMC_CLKGEN_COUNTER,
@@ -181,7 +154,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		SMC_PAR_1BPCK,
 		SMC_INVQUAL_DONTCARE);
 
-	SGPIO_configSliceMuxReg(DATA_IN_CFG.sliceId, sliceMuxCfg);
+	SGPIO_configSliceMuxReg(SGPIO_SPI_MISO_SLICE_ID, sliceMuxCfg);
 
 	muxCfg = SGPIO_makeMuxConfig(
 		MC_CLK_INTERNAL,
@@ -193,28 +166,21 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		MC_CONCATEN_DONTCARE,
 		MC_CONCAT_ORDER_DONTCARE);
 
-	SGPIO_configMuxReg(DATA_IN_CFG.sliceId, muxCfg);
+	SGPIO_configMuxReg(SGPIO_SPI_MISO_SLICE_ID, muxCfg);
 
 	outMuxCfg = SGPIO_makeOutMuxConfig(OMC_DOUTM1, OMC_GPIO_OE);
-	SGPIO_configOutMuxReg(DATA_IN_CFG.pinId, outMuxCfg);
-//	  can be modified to test the clk output
-//	 	outMuxCfg = SGPIO_makeOutMuxConfig(OMC_CLKOUT, OMC_GPIO_OE);
-//	 	SGPIO_configOutMuxReg((SGPIO_Pin)10, outMuxCfg);
+	SGPIO_configOutMuxReg(SGPIO_SPI_MISO_PIN_ID, outMuxCfg);
 
-	  //can be modified to test the clk output
-	// SGPIO_setOeReg((SGPIO_Pin)10, outMuxCfg);
-
-	SGPIO_setBitCountReg(DATA_IN_CFG.sliceId, DBIT_8);
-	SGPIO_setCountReloadReg(DATA_IN_CFG.sliceId, this->sgpioClockHz/bitrate);
-	SGPIO_writeDataReg(DATA_IN_CFG.sliceId, 0x0);
-	SGPIO_writeDataShadowReg(DATA_IN_CFG.sliceId, 0x0);
-
+	SGPIO_setBitCountReg(SGPIO_SPI_MISO_SLICE_ID, 8);
+	SGPIO_setCountReloadReg(SGPIO_SPI_MISO_SLICE_ID, this->sgpioClockHz/bitrate);
+	SGPIO_writeDataReg(SGPIO_SPI_MISO_SLICE_ID, 0x0);
+	SGPIO_writeDataShadowReg(SGPIO_SPI_MISO_SLICE_ID, 0x0);
 
 	/**********************************************************************
 	* make the static configuration for the NSS, slice P
 	*
 	**********************************************************************/
-	SGPIO_disableSlice(NSS_CFG.sliceId);
+	SGPIO_disableSlice(SGPIO_SPI_NSS_SLICE_ID);
 
 	sliceMuxCfg = SGPIO_makeSliceMuxConfig(
 		SMC_DONT_MATCH,
@@ -226,7 +192,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		SMC_INVQUAL_INVERTED
 		);
 
-	SGPIO_configSliceMuxReg(NSS_CFG.sliceId, sliceMuxCfg);
+	SGPIO_configSliceMuxReg(SGPIO_SPI_NSS_SLICE_ID, sliceMuxCfg);
 
 	muxCfg = SGPIO_makeMuxConfig(
 		MC_CLK_DONTCARE,
@@ -238,178 +204,62 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		MC_CONCATEN_DONTCARE,
 		MC_CONCAT_ORDER_DONTCARE);
 
-	SGPIO_configMuxReg(NSS_CFG.sliceId, muxCfg);
+	SGPIO_configMuxReg(SGPIO_SPI_NSS_SLICE_ID, muxCfg);
 
 	outMuxCfg = SGPIO_makeOutMuxConfig(OMC_GPIO_OUT, OMC_GPIO_OE);
-	SGPIO_configOutMuxReg(NSS_CFG.pinId, outMuxCfg);
-	if(NSS_CFG.sliceFunc == SGPIO_OUTPUT_PIN)
-		SGPIO_setOeReg(NSS_CFG.pinId, outMuxCfg);
+	SGPIO_configOutMuxReg(SGPIO_SPI_NSS_PIN_ID, outMuxCfg);
+	if(SGPIO_SPI_NSS_SLICE_FUNC == SGPIO_OUTPUT_PIN)
+		SGPIO_setOeReg(SGPIO_SPI_NSS_PIN_ID, outMuxCfg);
 
-	LPC_SGPIO->GPIO_OUTREG |= (0x1 << NSS_CFG.pinId);
+	LPC_SGPIO->GPIO_OUTREG |= (0x1 << SGPIO_SPI_NSS_PIN_ID);
 
 	// enable capture interrupt for slice CHIP SELECT
-	LPC_SGPIO->SET_EN_1 = (1<<CLOCK_CFG.sliceId);
-	LPC_SGPIO->CTR_STATUS_1 = (1<<CLOCK_CFG.sliceId);		// clear capture interrupt status
-	while(LPC_SGPIO->STATUS_1 & (1<<CLOCK_CFG.sliceId));		// wait for status to clear
-}
-
-void SGPIO_SPI_t::SGPIO_spiWrite(uint8_t dataWrite, uint8_t* dataRead){
-
-	static uint32_t rxWord = 0;
-
-	SGPIO_writeDataReg(DATA_OUT_CFG.sliceId, reverseBitsInByteTable[dataWrite]);
-	SGPIO_enableSlices(true,this->masterMask);
-
-	while(! ((LPC_SGPIO->STATUS_1) & (1<<CLOCK_CFG.sliceId)));
-	LPC_SGPIO->CTR_STATUS_1 = (1<<CLOCK_CFG.sliceId);
-
-	SGPIO_disableSlices(this->masterMask);
-	SGPIO_readDataReg(DATA_IN_CFG.sliceId, DBIT_8, &rxWord);
-	if(dataRead != NULL) *dataRead = reverseBitsInByteTable[rxWord&0xFF];
-
-	SGPIO_writeDataReg(DATA_IN_CFG.sliceId, 0x0);
-	SGPIO_setCountReg(CLOCK_CFG.sliceId, 0);
-	SGPIO_setCountReg(DATA_OUT_CFG.sliceId, 0);
-	SGPIO_setCountReg(DATA_IN_CFG.sliceId, 0);
+	LPC_SGPIO->SET_EN_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
+	LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);		// clear capture interrupt status
+	while(LPC_SGPIO->STATUS_1 & (1<<SGPIO_SPI_SCK_SLICE_ID));		// wait for status to clear
 }
 
 uint8_t SGPIO_SPI_t::TxRx_frame(uint8_t data){
 
 	static uint8_t ret = 0;
 
-	LPC_SGPIO->GPIO_OUTREG &= ~(0x1 << NSS_CFG.pinId);
+	LPC_SGPIO->GPIO_OUTREG &= ~(0x1 << SGPIO_SPI_NSS_PIN_ID);
 
-	this->SGPIO_spiWrite(data, &ret);
+	SGPIO_writeDataReg(SGPIO_SPI_MOSI_SLICE_ID, reverseBitsInByteTable[data]);
+	//enable slices
+	SGPIO_enableSlices(true, this->masterMask);
+	while(! ((LPC_SGPIO->STATUS_1) & (1<<SGPIO_SPI_SCK_SLICE_ID)));
+	LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
 
-	LPC_SGPIO->GPIO_OUTREG |= (0x1 << NSS_CFG.pinId);
+	SGPIO_disableSlices(this->masterMask);
+	ret = reverseBitsInByteTable[(LPC_SGPIO->REG[SGPIO_SPI_MISO_SLICE_ID] >> 24)&0xFF];
+
+	LPC_SGPIO->GPIO_OUTREG |= (0x1 << SGPIO_SPI_NSS_PIN_ID);
 
 	return ret;
 }
 
-
-#include "CONTROLLER.hpp"
 uint32_t SGPIO_SPI_t::TxRx_frame(uint8_t* tx_data, uint8_t* rx_data, uint32_t length){
 
-//	uint16_t offset = 0;
-//
-//	LPC_SGPIO->GPIO_OUTREG &= ~(0x1 << NSS_CFG.pinId);
-//
-//	for(uint32_t i = 0; i < length; i++)
-//		tx_data[i] = reverseBitsInByteTable[tx_data[i]];
-//
-//
-//	SGPIO_writeDataReg(DATA_OUT_CFG.sliceId, tx_data[offset++]);
-//
-//	while(offset < length) {
-//
-//		LPC_SGPIO->CTRL_ENABLED	 |= this->masterMask;
-//
-//		LPC_SGPIO->GPIO_OUTREG |= (0x1 << NSS_CFG.pinId);
-//
-//		if(true == true) LPC_SGPIO->CTRL_DISABLED |= this->masterMask;
-//
-//		//SGPIO_enableSlices(true, this->masterMask);
-//
-//
-//		SGPIO_writeDataShadowReg(DATA_OUT_CFG.sliceId, tx_data[offset]);
-//
-//		LPC_SGPIO->GPIO_OUTREG &= ~(0x1 << NSS_CFG.pinId);
-//
-//		if(offset > 1) rx_data[offset - 2] = (LPC_SGPIO->REG_SS[DATA_IN_CFG.sliceId] >> 24)&0xFF;
-//		offset++;
-//
-//
-//		while(! ((LPC_SGPIO->STATUS_1) & (1<<CLOCK_CFG.sliceId)));
-//		LPC_SGPIO->CTR_STATUS_1 = (1<<CLOCK_CFG.sliceId);
-//
-//		//rx_data[offset - 1] = (LPC_SGPIO->REG[DATA_IN_CFG.sliceId] >> 24)&0xFF;
-//
-//
-//		SGPIO_disableSlices(this->masterMask);
-//
-//
-//	}
-//
-//
-//
-//	SGPIO_enableSlices(true, this->masterMask);
-//	while(! ((LPC_SGPIO->STATUS_1) & (1<<CLOCK_CFG.sliceId)));
-//	LPC_SGPIO->CTR_STATUS_1 = (1<<CLOCK_CFG.sliceId);
-//	rx_data[offset - 1] = (LPC_SGPIO->REG_SS[DATA_IN_CFG.sliceId] >> 24)&0xFF;
-//	SGPIO_disableSlices(this->masterMask);
-//
-//
-//	for(uint32_t i = 0; i < length; i++)
-//		rx_data[i] = reverseBitsInByteTable[rx_data[i]];
-//
-//	LPC_SGPIO->GPIO_OUTREG |= (0x1 << NSS_CFG.pinId);
-//
-//	return length;
-
-
-
-	LPC_SGPIO->GPIO_OUTREG &= ~(0x1 << NSS_CFG.pinId);
+	LPC_SGPIO->GPIO_OUTREG &= ~(0x1 << SGPIO_SPI_NSS_PIN_ID);
 
 	for(uint32_t i = 0; i < length; i++){
-		SGPIO_writeDataReg(DATA_OUT_CFG.sliceId, reverseBitsInByteTable[tx_data[i]]);
-		//enable slices
+
+		LPC_SGPIO->REG[SGPIO_SPI_MOSI_SLICE_ID] = reverseBitsInByteTable[tx_data[i]];
+
 		SGPIO_enableSlices(true, this->masterMask);
 
-		while(! ((LPC_SGPIO->STATUS_1) & (1<<CLOCK_CFG.sliceId)));
-		LPC_SGPIO->CTR_STATUS_1 = (1<<CLOCK_CFG.sliceId);
-
-		rx_data[i] = reverseBitsInByteTable[(LPC_SGPIO->REG_SS[DATA_IN_CFG.sliceId] >> 24)&0xFF];
+		while(! ((LPC_SGPIO->STATUS_1) & (1<<SGPIO_SPI_SCK_SLICE_ID)));
+		LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
 
 		SGPIO_disableSlices(this->masterMask);
+
+		rx_data[i] = reverseBitsInByteTable[(LPC_SGPIO->REG[SGPIO_SPI_MISO_SLICE_ID] >> 24)&0xFF];
 	}
 
-	LPC_SGPIO->GPIO_OUTREG |= (0x1 << NSS_CFG.pinId);
+	LPC_SGPIO->GPIO_OUTREG |= (0x1 << SGPIO_SPI_NSS_PIN_ID);
 
 	return length;
-
-
-
-//	uint16_t offset = 0;
-//
-//	LPC_SGPIO->GPIO_OUTREG &= ~(0x1 << NSS_CFG.pinId);
-//
-//	//write first byte to slice
-//	SGPIO_writeDataReg(DATA_OUT_CFG.sliceId, reverseBitsInByteTable[tx_data[offset++]]);
-//	//enable slices
-//	SGPIO_enableSlices(length == 1, this->masterMask);
-//
-//	while(offset < length) {
-//		//LPC_SGPIO->GPIO_OUTREG |= (0x1 << NSS_CFG.pinId);
-//		//push next byte to shadow register
-//		SGPIO_writeDataShadowReg(DATA_OUT_CFG.sliceId, reverseBitsInByteTable[tx_data[offset]]);
-//		//wait for previous slice done
-//		while(! ((LPC_SGPIO->STATUS_1) & (1<<CLOCK_CFG.sliceId)));
-//		LPC_SGPIO->CTR_STATUS_1 = (1<<CLOCK_CFG.sliceId);
-//		//disable cyclic mode when last byte transmitted
-//		if(offset == (length - 1)) {
-//			LPC_SGPIO->CTRL_DISABLED |= this->masterMask;
-//		}
-//		//read from shadow
-//		rx_data[offset - 1] = reverseBitsInByteTable[(LPC_SGPIO->REG_SS[DATA_IN_CFG.sliceId] >> 24)&0xFF];
-//		offset++;
-//		//LPC_SGPIO->GPIO_OUTREG &= ~(0x1 << NSS_CFG.pinId);
-//	}
-//	//wait for previous slice done
-//
-//	//LPC_SGPIO->CTRL_DISABLED |= this->masterMask;
-//
-//	while(! ((LPC_SGPIO->STATUS_1) & (1<<CLOCK_CFG.sliceId)));
-//	LPC_SGPIO->CTR_STATUS_1 = (1<<CLOCK_CFG.sliceId);
-//
-//
-//
-//	rx_data[offset - 1] = reverseBitsInByteTable[(LPC_SGPIO->REG_SS[DATA_IN_CFG.sliceId] >> 24)&0xFF];
-//
-//	SGPIO_disableSlices(this->masterMask); //140ns
-//
-//	LPC_SGPIO->GPIO_OUTREG |= (0x1 << NSS_CFG.pinId);
-//
-//	return length;
 }
 
 void SGPIO_SPI_t::Deinitialize(void){
@@ -418,6 +268,3 @@ void SGPIO_SPI_t::Deinitialize(void){
 	Chip_RGU_TriggerReset(RGU_SGPIO_RST);
 	while (Chip_RGU_InReset(RGU_SGPIO_RST)) {}
 }
-
-
-
