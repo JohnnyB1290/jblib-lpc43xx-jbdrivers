@@ -226,11 +226,14 @@ uint8_t SGPIO_SPI_t::TxRx_frame(uint8_t data){
 	LPC_SGPIO->GPIO_OUTREG &= ~(0x1 << SGPIO_SPI_NSS_PIN_ID);
 
 	SGPIO_writeDataReg(SGPIO_SPI_MOSI_SLICE_ID, reverseBitsInByteTable[data]);
-	//enable slices
-	SGPIO_enableSlices(true, this->masterMask);
-	while(! ((LPC_SGPIO->STATUS_1) & (1<<SGPIO_SPI_SCK_SLICE_ID)));
-	LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
 
+	SGPIO_enableSlices(true, this->masterMask);
+	for(uint32_t j = 0; j < 200; j++){
+		if((LPC_SGPIO->STATUS_1) & (1<<SGPIO_SPI_SCK_SLICE_ID)){
+			LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
+			break;
+		}
+	}
 	SGPIO_disableSlices(this->masterMask);
 	ret = reverseBitsInByteTable[(LPC_SGPIO->REG[SGPIO_SPI_MISO_SLICE_ID] >> 24)&0xFF];
 
@@ -248,10 +251,12 @@ uint32_t SGPIO_SPI_t::TxRx_frame(uint8_t* tx_data, uint8_t* rx_data, uint32_t le
 		LPC_SGPIO->REG[SGPIO_SPI_MOSI_SLICE_ID] = reverseBitsInByteTable[tx_data[i]];
 
 		SGPIO_enableSlices(true, this->masterMask);
-
-		while(! ((LPC_SGPIO->STATUS_1) & (1<<SGPIO_SPI_SCK_SLICE_ID)));
-		LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
-
+		for(uint32_t j = 0; j < 200; j++){
+			if((LPC_SGPIO->STATUS_1) & (1<<SGPIO_SPI_SCK_SLICE_ID)){
+				LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
+				break;
+			}
+		}
 		SGPIO_disableSlices(this->masterMask);
 
 		rx_data[i] = reverseBitsInByteTable[(LPC_SGPIO->REG[SGPIO_SPI_MISO_SLICE_ID] >> 24)&0xFF];
