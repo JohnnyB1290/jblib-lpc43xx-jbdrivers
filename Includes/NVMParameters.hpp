@@ -9,8 +9,11 @@
 #define NVMPARAMETERS_HPP_
 
 #include "chip.h"
+#include "Common_interfaces.hpp"
 
-#define NVM_PARAMETERS_MAGIC 0xAFDE
+#define NVM_PARAMETERS_MAGIC 					0xAFDE
+#define NVM_PARAMETERS_CELL_DESCRIPTION_SIZE	32
+#define NVM_PARAMETERS_CELL_DATA_SIZE			32
 
 #pragma pack(push, 1)
 
@@ -26,9 +29,11 @@ typedef struct NVMParamsCell_struct{
 	uint8_t type;
 	uint8_t descriptionSize;
 	uint8_t dataSize;
-	uint8_t reserved;
-	char description[32];
-	uint8_t data[32];
+	uint8_t uid;
+	uint8_t groupId;
+	uint8_t reserved[3];
+	char description[NVM_PARAMETERS_CELL_DESCRIPTION_SIZE];
+	uint8_t data[NVM_PARAMETERS_CELL_DATA_SIZE];
 }NVMParamsCell_t;
 
 #pragma pack(pop)
@@ -52,10 +57,12 @@ typedef enum{
 class NVMParameters_t{
 public:
 	static NVMParameters_t* getNVMParametersPtr(void);
-	NVMParamsCell_t* getParameter(char* paramDescription, uint8_t* buf, uint8_t bufSize); //return type
+	NVMParamsCell_t* getParameter(char* paramDescription, uint8_t* buf, uint8_t bufSize);
 	NVMParamsCell_t* getParameter(char* paramDescription);
 	void setParameter(NVMParamsCell_t* paramsCellPtr);
 	void setParameter(uint8_t type, char* description, uint8_t* data, uint8_t dataSize);
+	void setParameter(uint8_t type, uint8_t uid, char* description, uint8_t* data, uint8_t dataSize);
+	void setParameter(uint8_t type, uint8_t uid, uint8_t groupId, char* description, uint8_t* data, uint8_t dataSize);
 	void deleteParameter(char* paramDescription);
 	void eraseAllParameters(void);
 	NVMParamsHeader_t* getHeaderPtr(void);
@@ -63,6 +70,7 @@ public:
 	void setAllParameters(void* ptr);
 	uint32_t getCompressedParametersSize(void);
 	uint32_t getCompressedParameters(uint8_t* buf);
+	void setChangeCallback(Callback_Interface_t* changeCall);
 private:
 	NVMParameters_t(void);
 
@@ -71,6 +79,13 @@ private:
 	static NVMParamsHeader_t* paramsHeaderPtr;
 	static uint8_t paramsHeaderSize;
 	static uint8_t paramsCellSize;
+
+	static const uint32_t cellHeaderSize = sizeof(NVMParamsCell_t) -
+			NVM_PARAMETERS_CELL_DESCRIPTION_SIZE -
+			NVM_PARAMETERS_CELL_DATA_SIZE;
+
+	NVMParamsCell_t lastSetCell;
+	Callback_Interface_t* changeCall;
 };
 
 

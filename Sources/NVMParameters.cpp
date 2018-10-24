@@ -27,6 +27,7 @@ NVMParameters_t* NVMParameters_t::getNVMParametersPtr(void){
 
 NVMParameters_t::NVMParameters_t(void){
 
+	this->changeCall = (Callback_Interface_t*)NULL;
 	EEPROM_t::getEEPROM().Initialize();
 	if(NVMParameters_t::paramsHeaderPtr->magic != NVM_PARAMETERS_MAGIC){
 		this->eraseAllParameters();
@@ -45,21 +46,19 @@ NVMParameters_t::NVMParameters_t(void){
 	}
 }
 
-
 NVMParamsCell_t* NVMParameters_t::getParameter(char* paramDescription){
 
 	if(NVMParameters_t::paramsHeaderPtr->size == 0) return (NVMParamsCell_t*)NULL;
 
 	NVMParamsCell_t* cellPtr = (NVMParamsCell_t*)(NVMParameters_t::baseAddr + NVMParameters_t::paramsHeaderSize);
 	for(uint8_t i = 0; i < NVMParameters_t::paramsHeaderPtr->size; i++){
-		if(strncmp(cellPtr->description, paramDescription, sizeof(cellPtr->description)) == 0){
+		if(strncmp(cellPtr->description, paramDescription, NVM_PARAMETERS_CELL_DESCRIPTION_SIZE) == 0){
 			return cellPtr;
 		}
 		cellPtr++;
 	}
 	return (NVMParamsCell_t*)NULL;
 }
-
 
 NVMParamsCell_t* NVMParameters_t::getParameter(char* paramDescription, uint8_t* buf, uint8_t bufSize){
 
@@ -73,6 +72,7 @@ NVMParamsCell_t* NVMParameters_t::getParameter(char* paramDescription, uint8_t* 
 
 void NVMParameters_t::setParameter(NVMParamsCell_t* paramsCellPtr){
 
+	__disable_irq();
 	NVMParamsHeader_t tempHeader;
 	memcpy(&tempHeader, NVMParameters_t::paramsHeaderPtr, NVMParameters_t::paramsHeaderSize);
 
@@ -92,23 +92,44 @@ void NVMParameters_t::setParameter(NVMParamsCell_t* paramsCellPtr){
 				tempHeader.size * NVMParameters_t::paramsCellSize);
 
 	EEPROM_t::getEEPROM().Write((uint32_t)NVMParameters_t::paramsHeaderPtr,(uint8_t*)&tempHeader,NVMParameters_t::paramsHeaderSize);
+
+	memcpy((void*)&this->lastSetCell, (void*)paramsCellPtr, NVMParameters_t::paramsCellSize);
+	__enable_irq();
+
+	if(this->changeCall != (Callback_Interface_t*)NULL)
+		this->changeCall->void_callback(this,(void*)paramsCellPtr->uid);
 }
 
 void NVMParameters_t::setParameter(uint8_t type, char* description, uint8_t* data, uint8_t dataSize){
 
+	this->setParameter(type, 0xFF, description, data, dataSize);
+}
+
+void NVMParameters_t::setParameter(uint8_t type, uint8_t uid, char* description, uint8_t* data, uint8_t dataSize){
+	this->setParameter(type, 0xFF, 0xFF, description, data, dataSize);
+}
+
+void NVMParameters_t::setParameter(uint8_t type, uint8_t uid, uint8_t groupId, char* description, uint8_t* data, uint8_t dataSize){
+
 	NVMParamsCell_t tempCell;
 	memset(&tempCell, 0, NVMParameters_t::paramsCellSize);
 
+	tempCell.uid = uid;
+	tempCell.groupId = groupId;
 	tempCell.type = type;
-	tempCell.dataSize = (sizeof(tempCell.data) <= dataSize) ? sizeof(tempCell.data) : dataSize;
-	strncpy(tempCell.description, description, sizeof(tempCell.description));
+	tempCell.dataSize = (NVM_PARAMETERS_CELL_DATA_SIZE <= dataSize) ? NVM_PARAMETERS_CELL_DATA_SIZE : dataSize;
+	strncpy(tempCell.description, description, NVM_PARAMETERS_CELL_DESCRIPTION_SIZE);
 	memcpy(tempCell.data, data, tempCell.dataSize);
 	tempCell.descriptionSize = strlen(tempCell.description);
 
 	this->setParameter(&tempCell);
+
 }
 
+
 void NVMParameters_t::deleteParameter(char* paramDescription){
+
+	__disable_irq();
 
 	if(NVMParameters_t::paramsHeaderPtr->size == 0) return;
 
@@ -134,9 +155,11 @@ void NVMParameters_t::deleteParameter(char* paramDescription){
 					tempHeader.size * NVMParameters_t::paramsCellSize);
 
 	EEPROM_t::getEEPROM().Write((uint32_t)NVMParameters_t::paramsHeaderPtr,(uint8_t*)&tempHeader,NVMParameters_t::paramsHeaderSize);
+	__enable_irq();
 }
 
 void NVMParameters_t::eraseAllParameters(void){
+	__disable_irq();
 	NVMParamsHeader_t tempHeader;
 
 	memset(&tempHeader, 0, NVMParameters_t::paramsHeaderSize);
@@ -144,6 +167,7 @@ void NVMParameters_t::eraseAllParameters(void){
 	tempHeader.size = 0;
 
 	EEPROM_t::getEEPROM().Write((uint32_t)NVMParameters_t::paramsHeaderPtr,(uint8_t*)&tempHeader,NVMParameters_t::paramsHeaderSize);
+	__enable_irq();
 }
 
 
@@ -157,11 +181,12 @@ uint32_t NVMParameters_t::getParametersSize(void){
 }
 
 void NVMParameters_t::setAllParameters(void* ptr){
+	__disable_irq();
 	EEPROM_t::getEEPROM().Write((uint32_t)NVMParameters_t::paramsHeaderPtr,
 			(uint8_t*)ptr,NVMParameters_t::paramsHeaderSize +
 			NVMParameters_t::paramsCellSize * ((NVMParamsHeader_t*)ptr)->size);
+	__enable_irq();
 }
-
 
 uint32_t NVMParameters_t::getCompressedParametersSize(void){
 
@@ -169,7 +194,7 @@ uint32_t NVMParameters_t::getCompressedParametersSize(void){
 	NVMParamsCell_t* cellPtr = (NVMParamsCell_t*)(NVMParameters_t::baseAddr + NVMParameters_t::paramsHeaderSize);
 
 	for(uint8_t i = 0; i < NVMParameters_t::paramsHeaderPtr->size; i++){
-		retSize += 4 + cellPtr->descriptionSize + cellPtr->dataSize;
+		retSize += this->cellHeaderSize + cellPtr->descriptionSize + cellPtr->dataSize;
 		cellPtr++;
 	}
 	return retSize;
@@ -186,10 +211,12 @@ uint32_t NVMParameters_t::getCompressedParameters(uint8_t* buf){
 
 	for(uint8_t i = 0; i < NVMParameters_t::paramsHeaderPtr->size; i++){
 
-		retSize += 4 + cellPtr->descriptionSize + cellPtr->dataSize;
-		memcpy(ptr,(uint8_t*)cellPtr, 4 + cellPtr->descriptionSize);
-		ptr += (4 + cellPtr->descriptionSize);
-		memcpy(ptr,((uint8_t*)cellPtr) + 4 + sizeof(cellPtr->description), cellPtr->dataSize);
+		retSize += this->cellHeaderSize + cellPtr->descriptionSize + cellPtr->dataSize;
+		memcpy(ptr,(uint8_t*)cellPtr, this->cellHeaderSize + cellPtr->descriptionSize);
+		ptr += (this->cellHeaderSize + cellPtr->descriptionSize);
+		memcpy(ptr,
+				((uint8_t*)cellPtr) + this->cellHeaderSize + NVM_PARAMETERS_CELL_DESCRIPTION_SIZE,
+				cellPtr->dataSize);
 		ptr += cellPtr->dataSize;
 		cellPtr++;
 	}
