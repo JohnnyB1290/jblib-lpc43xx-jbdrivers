@@ -93,10 +93,11 @@ void NVMParameters_t::setParameter(NVMParamsCell_t* paramsCellPtr){
 
 	EEPROM_t::getEEPROM().Write((uint32_t)NVMParameters_t::paramsHeaderPtr,(uint8_t*)&tempHeader,NVMParameters_t::paramsHeaderSize);
 
-	memcpy((void*)&this->lastSetCell, (void*)paramsCellPtr, NVMParameters_t::paramsCellSize);
+	if(paramsCellPtr->uid != 0xFF)
+		memcpy((void*)&this->lastSetCell, (void*)paramsCellPtr, NVMParameters_t::paramsCellSize);
 	__enable_irq();
 
-	if(this->changeCall != (Callback_Interface_t*)NULL)
+	if((paramsCellPtr->uid != 0xFF) && (this->changeCall != (Callback_Interface_t*)NULL))
 		this->changeCall->void_callback(this,(void*)paramsCellPtr->uid);
 }
 
