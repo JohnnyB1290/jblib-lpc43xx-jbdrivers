@@ -38,9 +38,9 @@ typedef struct NVMParamsCell_struct{
 
 #pragma pack(pop)
 
-#define PARAMS_CELL_TYPE_ARRAY_bm 	(1<<7) //1 - data is array
-#define PARAMS_CELL_TYPE_HEX_bm 	(1<<6) //1 - show data as hex, 0 - show data in dec
-
+#define PARAMS_CELL_TYPE_ARRAY_bm 			(1<<7) //1 - data is array
+#define PARAMS_CELL_TYPE_HEX_bm 			(1<<6) //1 - show data as hex, 0 - show data in dec
+#define PARAMS_CELL_TYPE_NOT_DISPLAY_bm 	(1<<5) //0 - display in WebIface, 1 - not display
 
 typedef enum{
 	nvmParamTypeU8 = 0,
