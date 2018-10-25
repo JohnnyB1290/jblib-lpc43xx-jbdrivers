@@ -123,9 +123,7 @@ void NVMParameters_t::setParameter(uint8_t type, uint8_t uid, uint8_t groupId, c
 	tempCell.descriptionSize = strlen(tempCell.description);
 
 	this->setParameter(&tempCell);
-
 }
-
 
 void NVMParameters_t::deleteParameter(char* paramDescription){
 
@@ -221,4 +219,12 @@ uint32_t NVMParameters_t::getCompressedParameters(uint8_t* buf){
 		cellPtr++;
 	}
 	return retSize;
+}
+
+NVMParamsCell_t* NVMParameters_t::getLastSetCellPtr(void){
+	return &this->lastSetCell;
+}
+
+void NVMParameters_t::setChangeCallback(Callback_Interface_t* changeCall){
+	this->changeCall = changeCall;
 }

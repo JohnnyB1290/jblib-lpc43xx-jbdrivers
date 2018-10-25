@@ -71,6 +71,7 @@ public:
 	uint32_t getCompressedParametersSize(void);
 	uint32_t getCompressedParameters(uint8_t* buf);
 	void setChangeCallback(Callback_Interface_t* changeCall);
+	NVMParamsCell_t* getLastSetCellPtr(void);
 private:
 	NVMParameters_t(void);
 
