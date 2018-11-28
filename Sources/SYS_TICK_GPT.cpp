@@ -15,7 +15,6 @@ SYS_TICK_t& SYS_TICK_t::getSYS_TICK(void)
 
 SYS_TICK_t::SYS_TICK_t(void):VOID_TIMER_t()
 {
-	this->callback = (VOID_CALLBACK_t)NULL;
 	this->callback_intrf_ptr = (Callback_Interface_t*)NULL;
 	this->setCode((uint64_t)1<<(-SysTick_IRQn));
 	IRQ_CONTROLLER_t& IRQ_Control = IRQ_CONTROLLER_t::getIRQController();
@@ -84,19 +83,13 @@ void SYS_TICK_t::SetCounter(uint32_t count)
 	}
 }
 
-void SYS_TICK_t::AddCall(VOID_CALLBACK_t IntCallback)
-{
-	if(this->callback == (VOID_CALLBACK_t)NULL) this->callback = IntCallback;
-}
-
 void SYS_TICK_t::AddCall(Callback_Interface_t* IntCallback)
 {
-	if(this->callback_intrf_ptr == (Callback_Interface_t*)NULL) this->callback_intrf_ptr = IntCallback;
+	this->callback_intrf_ptr = IntCallback;
 }
 
 void SYS_TICK_t::DeleteCall(void)
 {
-	this->callback = (VOID_CALLBACK_t)NULL;
 	this->callback_intrf_ptr = (Callback_Interface_t*)NULL;
 }
 
@@ -106,11 +99,9 @@ void SYS_TICK_t::Deinitialize(void)
 	IRQ_CONTROLLER_t& IRQ_Control = IRQ_CONTROLLER_t::getIRQController();
 	IRQ_Control.Delete_Cortex_IRQ_Listener(this);
 	this->Reset();
-	this->callback = (VOID_CALLBACK_t)NULL;
 }
 
 void SYS_TICK_t::IRQ(int8_t IRQ_num)
 {
-	if(this->callback != (VOID_CALLBACK_t)NULL) this->callback();
-	else if(this->callback_intrf_ptr != (Callback_Interface_t*)NULL) this->callback_intrf_ptr->void_callback((void*)this, NULL);
+	if(this->callback_intrf_ptr != (Callback_Interface_t*)NULL) this->callback_intrf_ptr->void_callback((void*)this, NULL);
 }

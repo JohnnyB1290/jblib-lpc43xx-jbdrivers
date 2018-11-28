@@ -24,7 +24,6 @@ public:
 	virtual void Reset(void);
 	virtual uint32_t GetCounter(void);
 	virtual void SetCounter(uint32_t count);
-	virtual void AddCall(VOID_CALLBACK_t IntCallback);
 	virtual void AddCall(Callback_Interface_t* IntCallback);
 	virtual void DeleteCall(void);
 	virtual void Deinitialize(void);
@@ -34,7 +33,6 @@ private:
 	uint8_t Main_tmr_num;
 	uint8_t Sub_tmr_num;
 	uint32_t VTMR_period;
-	VOID_CALLBACK_t callback;
 	Callback_Interface_t* callback_intrf_ptr;
 	virtual void IRQ(int8_t IRQ_num)__attribute__((used));
 	static LPC_TIMER_T* TMR_ptr[];

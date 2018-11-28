@@ -20,12 +20,10 @@ public:
 	virtual void Reset(void);
 	virtual uint32_t GetCounter(void);
 	virtual void SetCounter(uint32_t count);
-	virtual void AddCall(VOID_CALLBACK_t IntCallback);
 	virtual void AddCall(Callback_Interface_t* IntCallback);
 	virtual void DeleteCall(void);
 	virtual void Deinitialize(void);
 private:
-	VOID_CALLBACK_t callback;
 	Callback_Interface_t* callback_intrf_ptr;
 	virtual void IRQ(int8_t IRQ_num);
 	SYS_TICK_t(void);

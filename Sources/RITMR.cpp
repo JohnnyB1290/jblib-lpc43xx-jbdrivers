@@ -17,7 +17,6 @@ RITIMER_t& RITIMER_t::getRITIMER(void)
 
 RITIMER_t::RITIMER_t(void):VOID_TIMER_t()
 {
-	this->callback = (VOID_CALLBACK_t)NULL;
 	this->callback_intrf_ptr = (Callback_Interface_t*)NULL;
 	this->setCode((uint64_t)1<<RITIMER_IRQn);
 	IRQ_CONTROLLER_t& IRQ_Control = IRQ_CONTROLLER_t::getIRQController();
@@ -27,8 +26,7 @@ RITIMER_t::RITIMER_t(void):VOID_TIMER_t()
 #include "CONTROLLER.hpp"
 void RITIMER_t::IRQ(int8_t IRQ_num)
 {
-	if(callback != (VOID_CALLBACK_t)NULL) callback();
-	else if(this->callback_intrf_ptr != (Callback_Interface_t*)NULL) this->callback_intrf_ptr->void_callback((void*)this, NULL);
+	if(this->callback_intrf_ptr != (Callback_Interface_t*)NULL) this->callback_intrf_ptr->void_callback((void*)this, NULL);
 	Chip_RIT_ClearInt(LPC_RITIMER);
 }
 
@@ -110,19 +108,13 @@ void RITIMER_t::SetCounter(uint32_t count)
 	}
 }
 
-void RITIMER_t::AddCall(VOID_CALLBACK_t IntCallback)
-{
-	if(this->callback_intrf_ptr == (Callback_Interface_t*)NULL) this->callback = IntCallback;
-}
-
 void RITIMER_t::AddCall(Callback_Interface_t* IntCallback)
 {
-	if(this->callback == (VOID_CALLBACK_t)NULL) this->callback_intrf_ptr = IntCallback;
+	this->callback_intrf_ptr = IntCallback;
 }
 
 void RITIMER_t::DeleteCall(void)
 {
-	this->callback = (VOID_CALLBACK_t)NULL;
 	this->callback_intrf_ptr = (Callback_Interface_t*)NULL;
 }
 
@@ -135,6 +127,5 @@ void RITIMER_t::Deinitialize(void)
 	Chip_RGU_TriggerReset(RGU_RITIMER_RST);
 	while (Chip_RGU_InReset(RGU_RITIMER_RST)) {}
 	Chip_RIT_DeInit(LPC_RITIMER);
-	this->callback = (VOID_CALLBACK_t)NULL;
 	this->callback_intrf_ptr = (Callback_Interface_t*)NULL;
 }

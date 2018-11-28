@@ -17,7 +17,6 @@ SCT_TIMER_t& SCT_TIMER_t::getSCT_TIMER(void)
 
 SCT_TIMER_t::SCT_TIMER_t(void):VOID_TIMER_t()
 {
-	this->callback = (VOID_CALLBACK_t)NULL;
 	this->callback_intrf_ptr = (Callback_Interface_t*)NULL;
 	this->setCode((uint64_t)1<<SCT_IRQn);
 	IRQ_CONTROLLER_t& IRQ_Control = IRQ_CONTROLLER_t::getIRQController();
@@ -29,8 +28,7 @@ void SCT_TIMER_t::IRQ(int8_t IRQ_num)
 	if(LPC_SCT->EVFLAG&1)
 	{
 		Chip_SCT_ClearEventFlag(LPC_SCT, SCT_EVT_0);
-		if(this->callback != (VOID_CALLBACK_t)NULL) this->callback();
-		else if(this->callback_intrf_ptr != (Callback_Interface_t*)NULL) this->callback_intrf_ptr->void_callback((void*)this, NULL);
+		if(this->callback_intrf_ptr != (Callback_Interface_t*)NULL) this->callback_intrf_ptr->void_callback((void*)this, NULL);
 	}
 	NVIC_ClearPendingIRQ(SCT_IRQn);
 }
@@ -110,19 +108,13 @@ void SCT_TIMER_t::SetCounter(uint32_t count)
 	}
 }
 
-void SCT_TIMER_t::AddCall(VOID_CALLBACK_t IntCallback)
-{
-	if(this->callback_intrf_ptr == (Callback_Interface_t*)NULL) this->callback = IntCallback;
-}
-
 void SCT_TIMER_t::AddCall(Callback_Interface_t* IntCallback)
 {
-	if(this->callback == (VOID_CALLBACK_t)NULL) this->callback_intrf_ptr = IntCallback;
+	this->callback_intrf_ptr = IntCallback;
 }
 
 void SCT_TIMER_t::DeleteCall(void)
 {
-	this->callback = (VOID_CALLBACK_t)NULL;
 	this->callback_intrf_ptr = (Callback_Interface_t*)NULL;
 	Chip_SCT_DisableEventInt(LPC_SCT, SCT_EVT_0);
 	LPC_SCT->EVENT[0].CTRL = 0;

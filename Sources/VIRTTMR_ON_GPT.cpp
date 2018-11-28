@@ -73,7 +73,6 @@ VIRT_GPT_TMR_t::VIRT_GPT_TMR_t(uint8_t Main_tmr_num, uint8_t Sub_tmr_num):VOID_T
 {
 	this->Main_tmr_num = Main_tmr_num;
 	this->Sub_tmr_num = Sub_tmr_num;
-	this->callback = (VOID_CALLBACK_t)NULL;
 	this->callback_intrf_ptr = (Callback_Interface_t*)NULL;
 	this->setCode((uint64_t)1<<(this->GPT_IRQn[this->Main_tmr_num]));
 	IRQ_CONTROLLER_t& IRQ_Control = IRQ_CONTROLLER_t::getIRQController();
@@ -89,8 +88,7 @@ void VIRT_GPT_TMR_t::IRQ(int8_t IRQ_num)
 		Chip_TIMER_ClearMatch(this->TMR_ptr[this->Main_tmr_num], this->Sub_tmr_num);
 		current_counter = this->TMR_ptr[this->Main_tmr_num]->TC;
 		Chip_TIMER_SetMatch(this->TMR_ptr[this->Main_tmr_num], this->Sub_tmr_num, (current_counter + this->VTMR_period));
-		if(this->callback != (VOID_CALLBACK_t)NULL) this->callback();
-		else if(this->callback_intrf_ptr != (Callback_Interface_t*)NULL) this->callback_intrf_ptr->void_callback((void*)this, NULL);
+		if(this->callback_intrf_ptr != (Callback_Interface_t*)NULL) this->callback_intrf_ptr->void_callback((void*)this, NULL);
 	}
 }
 
@@ -147,19 +145,13 @@ void VIRT_GPT_TMR_t::SetCounter(uint32_t count)
 	Chip_TIMER_SetMatch(this->TMR_ptr[this->Main_tmr_num], this->Sub_tmr_num, (current_counter + (this->VTMR_period - count)));
 }
 
-void VIRT_GPT_TMR_t::AddCall(VOID_CALLBACK_t IntCallback)
-{
-	if(this->callback_intrf_ptr == (Callback_Interface_t*)NULL) this->callback = IntCallback;
-}
-
 void VIRT_GPT_TMR_t::AddCall(Callback_Interface_t* IntCallback)
 {
-	if(this->callback == (VOID_CALLBACK_t)NULL) this->callback_intrf_ptr = IntCallback;
+	this->callback_intrf_ptr = IntCallback;
 }
 
 void VIRT_GPT_TMR_t::DeleteCall(void)
 {
-	this->callback = (VOID_CALLBACK_t)NULL;
 	this->callback_intrf_ptr = (Callback_Interface_t*)NULL;
 }
 
