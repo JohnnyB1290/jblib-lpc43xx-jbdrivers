@@ -88,7 +88,7 @@ void GPTimersGPT_t::Initialize(uint32_t us){
 	#endif
 
 	Chip_TIMER_Init(GPTimersGPT_t::lpcTmrPtr[this->timerNum]);
-	Chip_RGU_TriggerReset(GPTimersGPT_t::lpcTmrPtr[this->timerNum]);
+	Chip_RGU_TriggerReset(GPTimersGPT_t::resetNumber[this->timerNum]);
 	while (Chip_RGU_InReset(GPTimersGPT_t::resetNumber[this->timerNum])) {}
 	Chip_TIMER_Reset(GPTimersGPT_t::lpcTmrPtr[this->timerNum]);
 
@@ -140,7 +140,7 @@ void GPTimersGPT_t::DeleteCall(void){
 void GPTimersGPT_t::Deinitialize(void){
 	this->Stop();
 	NVIC_DisableIRQ(GPTimersGPT_t::gptIRQn[this->timerNum]);
-	Chip_RGU_TriggerReset(GPTimersGPT_t::lpcTmrPtr[this->timerNum]);
+	Chip_RGU_TriggerReset(GPTimersGPT_t::resetNumber[this->timerNum]);
 	while (Chip_RGU_InReset(GPTimersGPT_t::resetNumber[this->timerNum])) {}
 	Chip_TIMER_DeInit(GPTimersGPT_t::lpcTmrPtr[this->timerNum]);
 }
