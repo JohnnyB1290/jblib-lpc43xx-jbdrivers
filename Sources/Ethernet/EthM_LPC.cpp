@@ -137,6 +137,7 @@ void Eth_phy_t::Add_to_TX_queue(EthernetFrame* mes,uint16_t m_size)
 	if(m_size == 0) return;
 	if(this->Tx_Unlocked)
 	{
+		__disable_irq();
 		if(this->Check_if_TX_queue_not_full())
 		{
 			memcpy((uint8_t*)&(this->TxQueue.Frames[this->TxQueue.bw]),mes,m_size);
@@ -155,6 +156,7 @@ void Eth_phy_t::Add_to_TX_queue(EthernetFrame* mes,uint16_t m_size)
 			#endif
 			#endif
 		}
+		__enable_irq();
 	}
 }
 #ifdef USE_LWIP
@@ -170,6 +172,7 @@ void Eth_phy_t::Add_to_TX_queue(struct pbuf* p)
 
 	if(this->Tx_Unlocked)
 	{
+		__disable_irq();
 		if(this->Check_if_TX_queue_not_full())
 		{
 			if(p->next != NULL)
@@ -201,6 +204,7 @@ void Eth_phy_t::Add_to_TX_queue(struct pbuf* p)
 			#endif
 			#endif
 		}
+		__enable_irq();
 	}
 }
 #endif
