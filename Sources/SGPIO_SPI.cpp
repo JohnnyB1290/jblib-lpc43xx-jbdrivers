@@ -50,7 +50,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 	this->sgpioClockHz = Chip_Clock_GetRate(CLK_PERIPH_SGPIO);
 
 	Chip_SCU_PinMuxSet(SGPIO_SPI_MOSI_PORT, SGPIO_SPI_MOSI_PIN, (SCU_MODE_PULLUP | SGPIO_SPI_MOSI_SCU_FUNC)); /*  MOSI */
-	Chip_SCU_PinMuxSet(SGPIO_SPI_MISO_PORT, SGPIO_SPI_MISO_PIN, (SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SGPIO_SPI_MISO_SCU_FUNC)); /* MISO */
+	Chip_SCU_PinMuxSet(SGPIO_SPI_MISO_PORT, SGPIO_SPI_MISO_PIN, (SCU_PINIO_FAST | SGPIO_SPI_MISO_SCU_FUNC)); /* MISO */
 	Chip_SCU_PinMuxSet(SGPIO_SPI_SCK_PORT, SGPIO_SPI_SCK_PIN, (SCU_MODE_PULLUP | SCU_MODE_INBUFF_EN | SGPIO_SPI_SCK_SCU_FUNC)); /* SCK */
 	Chip_SCU_PinMuxSet(SGPIO_SPI_SSEL_PORT, SGPIO_SPI_SSEL_PIN, (SCU_MODE_PULLUP  | SGPIO_SPI_SSEL_SCU_FUNC)); /* NSS */
 
@@ -66,12 +66,12 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 
 	sliceMuxCfg = SGPIO_makeSliceMuxConfig(
 		SMC_MATCH_DATA,
-		SMC_CLKCAP_DONTCARE,
+		SMC_CLKCAP_RISING,
 		SMC_CLKGEN_COUNTER,
 		SMC_INVOUT_DONTCARE,
 		SMC_DATACAP_DONTCARE,
 		SMC_PAR_1BPCK,
-		SMC_INVQUAL_INVERTED
+		SMC_INVQUAL_DONTCARE
 		);
 
 	SGPIO_configSliceMuxReg(SGPIO_SPI_SCK_SLICE_ID, sliceMuxCfg);
@@ -80,7 +80,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		MC_CLK_DONTCARE,
 		MC_CLKSRC_PIN_DONTCARE,
 		MC_CLKSRC_SLICE_DONTCARE,
-		MC_QUALMODE_DISABLE,
+		MC_QUALMODE_DONTCARE,
 		MC_QUALPIN_DONTCARE,
 		MC_QUALSLICE_DONTCARE,
 		MC_CONCAT_DATA,
@@ -110,7 +110,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		SMC_INVOUT_DONTCARE,
 		SMC_DATACAP_DONTCARE,
 		SMC_PAR_1BPCK,
-		SMC_INVQUAL_INVERTED
+		SMC_INVQUAL_DONTCARE
 		);
 
 	SGPIO_configSliceMuxReg(SGPIO_SPI_MOSI_SLICE_ID, sliceMuxCfg);
@@ -119,7 +119,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		MC_CLK_INTERNAL,
 		MC_CLKSRC_PIN_DONTCARE,
 		MC_CLKSRC_SLICE_D,
-		MC_QUALMODE_DISABLE,
+		MC_QUALMODE_DONTCARE,
 		MC_QUALPIN_DONTCARE,
 		MC_QUALSLICE_DONTCARE,
 		MC_CONCATEN_DONTCARE,
@@ -150,7 +150,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		SMC_CLKCAP_RISING,
 		SMC_CLKGEN_COUNTER,
 		SMC_INVOUT_DONTCARE,
-		SMC_DATACAP_RISING,
+		SMC_DATACAP_DONTCARE,
 		SMC_PAR_1BPCK,
 		SMC_INVQUAL_DONTCARE);
 
@@ -159,7 +159,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 	muxCfg = SGPIO_makeMuxConfig(
 		MC_CLK_INTERNAL,
 		MC_CLKSRC_PIN_DONTCARE,
-		MC_CLKSRC_SLICE_D,
+		MC_CLKSRC_SLICE_DONTCARE,
 		MC_QUALMODE_DONTCARE,
 		MC_QUALPIN_DONTCARE,
 		MC_QUALSLICE_DONTCARE,
@@ -167,6 +167,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 		MC_CONCAT_ORDER_DONTCARE);
 
 	SGPIO_configMuxReg(SGPIO_SPI_MISO_SLICE_ID, muxCfg);
+
 
 	outMuxCfg = SGPIO_makeOutMuxConfig(OMC_DOUTM1, OMC_GPIO_OE);
 	SGPIO_configOutMuxReg(SGPIO_SPI_MISO_PIN_ID, outMuxCfg);
@@ -213,8 +214,7 @@ void SGPIO_SPI_t::Initialize(uint32_t bitrate){
 
 	LPC_SGPIO->GPIO_OUTREG |= (0x1 << SGPIO_SPI_NSS_PIN_ID);
 
-	// enable capture interrupt for slice CHIP SELECT
-	LPC_SGPIO->SET_EN_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
+	// enable capture interrupt
 	LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);		// clear capture interrupt status
 	while(LPC_SGPIO->STATUS_1 & (1<<SGPIO_SPI_SCK_SLICE_ID));		// wait for status to clear
 }
@@ -230,12 +230,15 @@ uint8_t SGPIO_SPI_t::TxRx_frame(uint8_t data){
 	SGPIO_enableSlices(true, this->masterMask);
 	for(uint32_t j = 0; j < 200; j++){
 		if((LPC_SGPIO->STATUS_1) & (1<<SGPIO_SPI_SCK_SLICE_ID)){
-			LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
 			break;
 		}
 	}
 	SGPIO_disableSlices(this->masterMask);
+	LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
 	ret = reverseBitsInByteTable[(LPC_SGPIO->REG[SGPIO_SPI_MISO_SLICE_ID] >> 24)&0xFF];
+	LPC_SGPIO->COUNT[SGPIO_SPI_MOSI_SLICE_ID] = 0;
+	LPC_SGPIO->COUNT[SGPIO_SPI_MISO_SLICE_ID] = 0;
+	LPC_SGPIO->COUNT[SGPIO_SPI_SCK_SLICE_ID] = 0;
 
 	LPC_SGPIO->GPIO_OUTREG |= (0x1 << SGPIO_SPI_NSS_PIN_ID);
 
@@ -243,23 +246,25 @@ uint8_t SGPIO_SPI_t::TxRx_frame(uint8_t data){
 }
 
 uint32_t SGPIO_SPI_t::TxRx_frame(uint8_t* tx_data, uint8_t* rx_data, uint32_t length){
-
+	
 	LPC_SGPIO->GPIO_OUTREG &= ~(0x1 << SGPIO_SPI_NSS_PIN_ID);
-
+	
 	for(uint32_t i = 0; i < length; i++){
-
+			
 		LPC_SGPIO->REG[SGPIO_SPI_MOSI_SLICE_ID] = reverseBitsInByteTable[tx_data[i]];
 
 		SGPIO_enableSlices(true, this->masterMask);
 		for(uint32_t j = 0; j < 200; j++){
 			if((LPC_SGPIO->STATUS_1) & (1<<SGPIO_SPI_SCK_SLICE_ID)){
-				LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
 				break;
 			}
 		}
-		SGPIO_disableSlices(this->masterMask);
-
+		SGPIO_disableSlices(this->masterMask);		
+		LPC_SGPIO->CTR_STATUS_1 = (1<<SGPIO_SPI_SCK_SLICE_ID);
 		rx_data[i] = reverseBitsInByteTable[(LPC_SGPIO->REG[SGPIO_SPI_MISO_SLICE_ID] >> 24)&0xFF];
+		LPC_SGPIO->COUNT[SGPIO_SPI_MOSI_SLICE_ID] = 0;
+		LPC_SGPIO->COUNT[SGPIO_SPI_MISO_SLICE_ID] = 0;
+		LPC_SGPIO->COUNT[SGPIO_SPI_SCK_SLICE_ID] = 0;
 	}
 
 	LPC_SGPIO->GPIO_OUTREG |= (0x1 << SGPIO_SPI_NSS_PIN_ID);
