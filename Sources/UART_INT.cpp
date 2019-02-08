@@ -74,7 +74,7 @@ void UART_int_t::Initialize(void* (*mem_alloc)(size_t),uint16_t tx_buf_size, Cha
 		Chip_UART_Init(UART_int_t::UART_LPC_ptrs[this->u_num]);
 		Chip_UART_SetBaud(UART_int_t::UART_LPC_ptrs[this->u_num], this->baudrate);
 		Chip_UART_ConfigData(UART_int_t::UART_LPC_ptrs[this->u_num], (UART_LCR_WLEN8 | UART_LCR_SBS_1BIT));
-		Chip_UART_SetupFIFOS(UART_int_t::UART_LPC_ptrs[this->u_num], (UART_FCR_FIFO_EN | UART_FCR_RX_RS | UART_FCR_TX_RS | UART_FCR_TRG_LEV2));
+		Chip_UART_SetupFIFOS(UART_int_t::UART_LPC_ptrs[this->u_num], (UART_FCR_FIFO_EN | UART_FCR_RX_RS | UART_FCR_TX_RS | UART_FCR_TRG_LEV0));
 		/* Enable receive data and line status interrupt */
 		Chip_UART_IntEnable(UART_int_t::UART_LPC_ptrs[this->u_num], UART_IER_RBRINT);
 		Chip_UART_TXEnable(UART_int_t::UART_LPC_ptrs[this->u_num]);
