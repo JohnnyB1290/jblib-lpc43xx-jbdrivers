@@ -33,21 +33,41 @@ UART_int_t* UART_int_t::get_UART_int(uint8_t u_num, uint32_t baudrate)
 	return UART_int_t::UART_ptrs[u_num];
 }
 
+UART_int_t* UART_int_t::get_RS485_int(uint8_t u_num, uint32_t baudrate, BOARD_GPIO_t* TR_ENABLE) {
+	if(u_num>=num_of_uarts) return NULL;
+	if(UART_int_t::UART_ptrs[u_num] == (UART_int_t*)NULL) UART_int_t::UART_ptrs[u_num] = new UART_int_t(u_num, baudrate, TR_ENABLE);
+	return UART_int_t::UART_ptrs[u_num];
+}
 
-UART_int_t::UART_int_t(uint8_t u_num, uint32_t baudrate):void_channel_t(),IRQ_LISTENER_t()
-{
+void UART_int_t::init(uint8_t u_num, uint32_t baudrate) {
 	this->Tx_buf_ptr = (uint8_t*)NULL;;
 	this->tx_buf_size = 0;
 	this->call_interface_ptr = (Channel_Call_Interface_t*)NULL;
 	this->UART_initialize = 0;
 	this->u_num = u_num;
 	this->baudrate = baudrate;
+	this->TR_ENABLE = NULL;
+	this->_rs485_dummy = 0;
 	this->setCode((uint64_t)1<<UART_int_t::UART_IRQn[this->u_num]);
 	IRQ_CONTROLLER_t& IRQ_Control = IRQ_CONTROLLER_t::getIRQController();
 	IRQ_Control.Add_Peripheral_IRQ_Listener(this);
-
 }
 
+UART_int_t::UART_int_t(uint8_t u_num, uint32_t baudrate):void_channel_t(),IRQ_LISTENER_t()
+{
+	this->init(u_num, baudrate);
+}
+
+UART_int_t::UART_int_t(uint8_t u_num, uint32_t baudrate, BOARD_GPIO_t* TR_ENABLE):void_channel_t(),IRQ_LISTENER_t()
+{
+	this->init(u_num, baudrate);
+	this->TR_ENABLE = TR_ENABLE;
+	if(this->TR_ENABLE != NULL) {
+		Chip_SCU_PinMuxSet(this->TR_ENABLE->port, this->TR_ENABLE->pin, this->TR_ENABLE->scu_mode);
+		Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, this->TR_ENABLE->gpio_port, this->TR_ENABLE->gpio_pin);
+		Chip_GPIO_SetPinState(LPC_GPIO_PORT, this->TR_ENABLE->gpio_port, this->TR_ENABLE->gpio_pin, (bool) false);
+	}
+}
 
 void UART_int_t::Initialize(void* (*mem_alloc)(size_t),uint16_t tx_buf_size, Channel_Call_Interface_t* call_interface_ptr)
 {
@@ -108,13 +128,18 @@ void UART_int_t::IRQ(int8_t IRQ_num)
 			if (RingBuffer_IsEmpty((RINGBUFF_T*)&(this->Tx_ring_buf)))
 			{
 				Chip_UART_IntDisable(UART_int_t::UART_LPC_ptrs[this->u_num], UART_IER_THREINT);
+				if(this->TR_ENABLE != NULL) {
+					Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT, this->TR_ENABLE->gpio_port, this->TR_ENABLE->gpio_pin);
+//					this->call_interface_ptr->channel_callback(NULL, 0, (void*)this, (void*) RS485Event_TX_END);
+				}
 			}
 		}
 
 		while(Chip_UART_ReadLineStatus(UART_int_t::UART_LPC_ptrs[this->u_num]) & UART_LSR_RDR)
 		{
 			byte = Chip_UART_ReadByte(UART_int_t::UART_LPC_ptrs[this->u_num]);
-			this->call_interface_ptr->channel_callback(&byte,1,(void*)this, NULL);
+			this->call_interface_ptr->channel_callback(&byte, 1, (void*)this, NULL);
+//			this->call_interface_ptr->channel_callback(&byte, 1, (void*)this, this->TR_ENABLE == NULL ? NULL : ((void*) RS485Event_RX));
 		}
 	}
 }
@@ -140,7 +165,13 @@ void UART_int_t::Tx(uint8_t *mes,uint16_t m_size,void* param)
 {
 	if(this->UART_initialize == 1)
 	{
+		if(this->TR_ENABLE != NULL) {
+			Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT, this->TR_ENABLE->gpio_port, this->TR_ENABLE->gpio_pin);
+		}
 		Chip_UART_SendRB(UART_int_t::UART_LPC_ptrs[this->u_num], (RINGBUFF_T*)&(this->Tx_ring_buf), mes, m_size);
+		if(this->TR_ENABLE != NULL) {
+			RingBuffer_InsertMult((RINGBUFF_T*)&(this->Tx_ring_buf), &(this->_rs485_dummy), 1);
+		}
 	}
 }
 

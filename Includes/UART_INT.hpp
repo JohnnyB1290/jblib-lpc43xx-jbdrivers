@@ -13,26 +13,36 @@
 
 #define num_of_uarts 4
 
+typedef enum RS485EventEnum {
+	RS485Event_RX,
+	RS485Event_TX_END,
+} RS485Event;
+
 class UART_int_t:public void_channel_t,protected IRQ_LISTENER_t
 {
 public:
 	static UART_int_t* get_UART_int(uint8_t u_num, uint32_t baudrate);
+	static UART_int_t* get_RS485_int(uint8_t u_num, uint32_t baudrate, BOARD_GPIO_t* TR_ENABLE);
 	virtual void Initialize(void* (*mem_alloc)(size_t),uint16_t tx_buf_size, Channel_Call_Interface_t* call_interface_ptr);
 	virtual void DEInitialize(void);
 	virtual void Tx(uint8_t *mes,uint16_t m_size,void* param);
 	virtual void GetParameter(uint8_t ParamName, void* ParamValue);
 	virtual void SetParameter(uint8_t ParamName, void* ParamValue);
 private:
+	void init(uint8_t u_num, uint32_t baudrate);
 	UART_int_t(uint8_t u_num, uint32_t baudrate);
+	UART_int_t(uint8_t u_num, uint32_t baudrate, BOARD_GPIO_t* TR_ENABLE);
 	virtual ~UART_int_t(void);
 	virtual void IRQ(int8_t IRQ_num);
 	uint8_t u_num;
+	uint8_t _rs485_dummy;
 	uint32_t baudrate;
 	RINGBUFF_T Tx_ring_buf;
 	uint8_t* Tx_buf_ptr;
 	uint16_t tx_buf_size;
 	Channel_Call_Interface_t* call_interface_ptr;
 	uint8_t UART_initialize;
+	BOARD_GPIO_t* TR_ENABLE;
 	static UART_int_t* UART_ptrs[num_of_uarts];
 
 	static LPC_USART_T* UART_LPC_ptrs[num_of_uarts];
