@@ -27,7 +27,7 @@ static void _delay_ms(uint32_t ms);
 #endif
 
 Eth_phy_t* Eth_phy_t::Eth_phy_ptr = (Eth_phy_t*)NULL;
-uint8_t Eth_phy_t::EmacPsMAC[6] = Eth_phy_Default_MAC;
+uint8_t Eth_phy_t::EmacPsMAC[6] = ETH_PHY_DEFAULT_MAC;
 
 Eth_phy_t* Eth_phy_t::get_Ethernet_phy(void)
 {

@@ -57,8 +57,8 @@ static ErrorCode_t C_RNDIS_BulkIN_hdlr(USBD_HANDLE_T hUsb, void *data, uint32_t 
 
 RNDIS_device_module_t::RNDIS_device_module_t(void):Ethernet_t(),USB_Devices_module_t()
 {
-	uint8_t Temp_MAC[6] = Eth_RNDIS_Default_MAC;
-	MAC_Address_t Temp_Adapter_MAC = Eth_RNDIS_Default_Adapter_MAC;
+	uint8_t Temp_MAC[6] = ETH_RNDIS_DEFAULT_MAC;
+	MAC_Address_t Temp_Adapter_MAC = ETH_RNDIS_ADAPTER_MAC;
 
 	this->USB_num = 0;
 	memcpy(this->MAC, Temp_MAC, 6);
