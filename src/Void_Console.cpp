@@ -14,15 +14,16 @@ Void_Console_t* Void_Console_t::Void_console_ptr = (Void_Console_t*)NULL;
 extern "C" {
 #endif
 
-#ifdef CODE_RED
+#ifdef __CODE_RED
 int _write(int iFileHandle, char *pcBuffer, int iLength)
 {
-	Void_Console_t* Console_ptr = Void_Console_t::Get_Console();
-	void_channel_t* Console_channel_ptr;
+	Void_Console_t* Console_ptr = Void_Console_t::Get_Console(0);
 
-	Console_channel_ptr = Console_ptr->Get_output_channel();
+	if(Console_ptr != (Void_Console_t*)NULL)
+	{
+		if(Console_ptr->Tx_ring_buffer_ptr != (ring_buf_t*)NULL) Console_ptr->Tx_ring_buffer_ptr->InsertMult((uint8_t*)pcBuffer, iLength);
+	}
 
-	if(Console_channel_ptr != (void_channel_t*)NULL) Console_channel_ptr->Tx((uint8_t*)pcBuffer, iLength);
 	return 0;
 }
 
