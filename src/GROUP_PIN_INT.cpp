@@ -1,9 +1,12 @@
 /*
  * GROUP_PIN_INT.cpp
  *
- *  Created on: 27 èþí. 2018 ã.
+ *  Created on: 27 ï¿½ï¿½ï¿½. 2018 ï¿½.
  *      Author: Stalker1290
  */
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "GROUP_PIN_INT.hpp"
 

@@ -4,6 +4,9 @@
  *  Created on: 07.09.2017
  *      Author: Stalker1290
  */
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "IPC.hpp"
 #include "string.h"
@@ -103,7 +106,6 @@ IPC_proto_t::IPC_proto_t(uint8_t gate):IRQ_LISTENER_t()
 	for(int i=0; i<IPC_Listeners_num; i++) this->ipcex_listeners[i] = (IPC_listener_t*)NULL;
 	for(int i=0; i<IPCEX_MAX_GBLVAL; i++) this->gblval[i] = 0;
 	/* Check if size is a power of 2 and >0*/
-	if ((IPCEX_QUEUE_SZ & (IPCEX_QUEUE_SZ - 1))|| IPCEX_QUEUE_SZ == 0) while (1); /* BUG: Size must always be power of 2 */
 
 	memset(this->qwr, 0, sizeof(*this->qwr));
 	this->qwr->count = IPCEX_QUEUE_SZ;

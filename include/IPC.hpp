@@ -13,6 +13,10 @@
 #include "Defines.h"
 #include "Common_interfaces.hpp"
 
+#if ((IPCEX_QUEUE_SZ & (IPCEX_QUEUE_SZ - 1))|| IPCEX_QUEUE_SZ == 0)
+#error "Size must always be power of 2"
+#endif
+
 #define IPC_Listeners_num IPCEX_MAX_IDS
 
 typedef struct ipc_queue_struct {

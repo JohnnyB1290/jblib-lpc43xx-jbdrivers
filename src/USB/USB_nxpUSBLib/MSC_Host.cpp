@@ -1,9 +1,12 @@
 /*
  * MSC_Host.cpp
  *
- *  Created on: 7 сент. 2018 г.
+ *  Created on: 7 пїЅпїЅпїЅпїЅ. 2018 пїЅ.
  *      Author: Stalker1290
  */
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #ifdef USE_CONSOLE
 #ifdef USB_console

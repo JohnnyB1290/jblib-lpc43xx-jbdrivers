@@ -4,6 +4,9 @@
  *  Created on: 10 окт. 2017 г.
  *      Author: Stalker1290
  */
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "Void_Console.hpp"
 #include "string.h"

@@ -1,9 +1,12 @@
 /*
  * I2CM.cpp
  *
- *  Created on: 29 окт. 2018 г.
+ *  Created on: 29 пїЅпїЅпїЅ. 2018 пїЅ.
  *      Author: Stalker1290
  */
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "I2CM.hpp"
 

@@ -1,9 +1,12 @@
 /*
  * EthM_LPC.cpp
  *
- *  Created on: 13 сен. 2017 г.
+ *  Created on: 13 пїЅпїЅпїЅ. 2017 пїЅ.
  *      Author: Stalker1290
  */
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "Ethernet/EthM_LPC.hpp"
 #include "stdio.h"
