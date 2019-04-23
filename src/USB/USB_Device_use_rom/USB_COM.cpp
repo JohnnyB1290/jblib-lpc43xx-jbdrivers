@@ -241,7 +241,7 @@ static ErrorCode_t CDC_BulkIN_Hdlr(USBD_HANDLE_T hUsb, void* data, uint32_t even
 
 static ErrorCode_t CDC_BulkOUT_Hdlr(USBD_HANDLE_T hUsb, void* data, uint32_t event)
 {
-	uint32_t count;
+	uint32_t count = 0;
 	VCOM_Device_module_t* Instance_ptr = (VCOM_Device_module_t*)data;
 
 	#ifdef USE_CONSOLE

@@ -1,7 +1,7 @@
 /*
  * NVMParameters.cpp
  *
- *  Created on: 11 сент. 2018 г.
+ *  Created on: 11 пїЅпїЅпїЅпїЅ. 2018 пїЅ.
  *      Author: Stalker1290
  */
 
@@ -97,8 +97,9 @@ void NVMParameters_t::setParameter(NVMParamsCell_t* paramsCellPtr){
 		memcpy((void*)&this->lastSetCell, (void*)paramsCellPtr, NVMParameters_t::paramsCellSize);
 	__enable_irq();
 
+	uint32_t callParam = paramsCellPtr->uid;
 	if((paramsCellPtr->uid != 0xFF) && (this->changeCall != (Callback_Interface_t*)NULL))
-		this->changeCall->void_callback(this,(void*)paramsCellPtr->uid);
+		this->changeCall->void_callback(this,(void*)callParam);
 }
 
 void NVMParameters_t::setParameter(uint8_t type, char* description, uint8_t* data, uint8_t dataSize){
