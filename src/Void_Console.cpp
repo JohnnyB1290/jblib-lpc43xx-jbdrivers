@@ -4,9 +4,6 @@
  *  Created on: 10 окт. 2017 г.
  *      Author: Stalker1290
  */
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "Void_Console.hpp"
 #include "string.h"
@@ -164,7 +161,9 @@ void Void_Console_t::void_callback(void* Intf_ptr, void* parameters)
 				if(this->Cmd_buf[this->Cmd_index - 1] == 0x0D) this->Cmd_buf[this->Cmd_index - 1] = 0;
 			}
 			this->Cmd_buf[this->Cmd_index] = 0;
+#ifdef USE_CONSOLE
 			printf("#JBravo::%s\n\r",(char*)this->Cmd_buf);
+#endif
 			for(int i = 0; i < Console_listeners_num; i++)
 			{
 				if(this->Console_Listeners[i] != (Console_listener_t*)NULL)
