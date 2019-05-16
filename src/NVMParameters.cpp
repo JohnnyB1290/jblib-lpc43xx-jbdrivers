@@ -4,9 +4,6 @@
  *  Created on: 11 ����. 2018 �.
  *      Author: Stalker1290
  */
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "NVMParameters.hpp"
 #include "EEPROM.hpp"
@@ -34,7 +31,9 @@ NVMParameters_t::NVMParameters_t(void){
 	EEPROM_t::getEEPROM().Initialize();
 	if(NVMParameters_t::paramsHeaderPtr->magic != NVM_PARAMETERS_MAGIC){
 		this->eraseAllParameters();
+#ifdef USE_CONSOLE
 		printf("NVM Parameters Error: invalid Magic!\r\n");
+#endif
 		return;
 	}
 
@@ -45,7 +44,9 @@ NVMParameters_t::NVMParameters_t(void){
 
 	if(NVMParameters_t::paramsHeaderPtr->crc != calcCrc){
 		this->eraseAllParameters();
+#ifdef USE_CONSOLE
 		printf("NVM Parameters Error: invalid CRC!\r\n");
+#endif
 	}
 }
 
