@@ -55,7 +55,13 @@ void EEPROM_t::Write(uint32_t Adress,uint8_t* Buf, uint32_t size)
 	{
 		temp_size = EEPROM_PAGE_SIZE - Page_offset;
 		if(size<=temp_size) temp_size = size;
-		memcpy((void*)Adress,(void*)Buf,temp_size);
+		uint32_t tempAddress = Adress - Page_offset;
+
+		memcpy((void*)this->pageBuf,(void*)tempAddress, EEPROM_PAGE_SIZE);
+		memcpy((void*)&this->pageBuf[Page_offset],(void*)Buf, temp_size);
+		memcpy((void*)tempAddress, (void*)this->pageBuf, EEPROM_PAGE_SIZE);
+
+//		memcpy((void*)Adress,(void*)Buf,temp_size);
 		Chip_EEPROM_EraseProgramPage(LPC_EEPROM);
 		size = size - temp_size;
 		Adress = Adress - Page_offset + EEPROM_PAGE_SIZE;
@@ -66,9 +72,10 @@ void EEPROM_t::Write(uint32_t Adress,uint8_t* Buf, uint32_t size)
 		bytes_bw = 0;
 	}
 	bytes_br = size;
-	if(size)
+	if(bytes_br)
 	{
-		Page_count = size/EEPROM_PAGE_SIZE + 1;
+		Page_count = size/EEPROM_PAGE_SIZE;
+		Page_count += (Page_count * EEPROM_PAGE_SIZE) == size ? 0 : 1;
 		for (Page = 0; Page < Page_count; Page++)
 		{
 			if(bytes_br > EEPROM_PAGE_SIZE)
@@ -81,8 +88,13 @@ void EEPROM_t::Write(uint32_t Adress,uint8_t* Buf, uint32_t size)
 			}
 			else
 			{
-				memcpy((void*)Adress,(void*)&Buf[bytes_bw],bytes_br);
+				memcpy((void*)this->pageBuf,(void*)Adress, EEPROM_PAGE_SIZE);
+
+				memcpy((void*)this->pageBuf,(void*)&Buf[bytes_bw],bytes_br);
+				memcpy((void*)Adress,(void*)this->pageBuf,EEPROM_PAGE_SIZE);
+
 				Chip_EEPROM_EraseProgramPage(LPC_EEPROM);
+
 			}
 		}
 	}

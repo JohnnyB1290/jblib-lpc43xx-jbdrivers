@@ -23,6 +23,7 @@ private:
 	EEPROM_t(void);
 	EEPROM_t(EEPROM_t const&);
 	EEPROM_t& operator=(EEPROM_t const&);
+	uint8_t pageBuf[EEPROM_PAGE_SIZE];
 };
 
 #endif /* EEPROM_HPP_ */
