@@ -80,7 +80,7 @@ void Eeprom::write(uint32_t address, const uint8_t* data, uint32_t size)
 		uint32_t tempSize = EEPROM_PAGE_SIZE - pageOffset;
 		if(size <= tempSize)
 			tempSize = size;
-				uint32_t tempAddress = Adress - Page_offset;
+		uint32_t tempAddress = address - pageOffset;
 		memcpy((void*)this->pageBuffer_, (void*)tempAddress, EEPROM_PAGE_SIZE);
 		memcpy((void*)&this->pageBuffer_[pageOffset],(void*)data, tempSize);
 		memcpy((void*)tempAddress, (void*)this->pageBuffer_, EEPROM_PAGE_SIZE);
