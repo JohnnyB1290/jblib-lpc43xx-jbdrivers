@@ -98,7 +98,6 @@ Console::Console(void) : IChannelCallback(), IVoidCallback()
 	for(uint32_t i = 0; i < CONSOLE_NUM_LISTENERS; i++)
 		consoleListeners_[i] = NULL;
 	memset(this->commandBuffer_, 0, CONSOLE_COMMAND_BUF_SIZE);
-	JbController::addMainProcedure(this);
 }
 
 

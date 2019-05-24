@@ -60,7 +60,7 @@
 #define DENSITY_bm			0x1F //BYTE1
 #define FAMILY_bm			0xE0 //BYTE1
 
-#define FRAM_SIZE 			512*1024
+#define FRAM_SIZE 			(512*1024)
 
 namespace jblib::jbdrivers
 {
