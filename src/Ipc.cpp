@@ -147,7 +147,6 @@ Ipc::Ipc(uint8_t gate) : IIPC(), IIrqListener()
 	for(uint32_t i = 0; i < IPC_NUM_GLOBAL_VALUES; i++)
 		this->globalValues_[i] = 0;
 
-	memset(this->writeQueue_, 0, sizeof(*this->writeQueue_));
 	this->writeQueue_->size = IPC_QUEUE_SIZE;
 	this->writeQueue_->itemSize = sizeof(IpcMsg_t);
 	this->writeQueue_->data = (uint8_t*)this->writeQueueData_;

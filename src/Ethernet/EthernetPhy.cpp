@@ -491,7 +491,7 @@ void EthernetPhy::getParameter(const uint8_t number, void* const value)
 void EthernetPhy::setParameter(const uint8_t number, void* const value)
 {
 	if(number == PARAMETER_MAC)
-		memcpy((char*)(&(EthernetPhy::mac_[0])), value, 6);
+		memcpy(EthernetPhy::mac_, value, 6);
 	else if(number == PARAMETER_TX_UNLOCK)
 		this->isTxUnlocked_ = *((bool*)value);
 	else if(number == PARAMETER_NAME)

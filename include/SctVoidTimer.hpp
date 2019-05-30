@@ -44,7 +44,7 @@ public:
 	virtual void start(void);
 	virtual void stop(void);
 	virtual void reset(void);
-	virtual uint32_t getCounter(void) const;
+	virtual uint32_t getCounter(void);
 	virtual void setCounter(uint32_t count);
 	virtual void addCallback(IVoidCallback* const callback);
 	virtual void deleteCallback(void);

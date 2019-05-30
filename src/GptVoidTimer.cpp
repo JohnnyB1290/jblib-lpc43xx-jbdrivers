@@ -199,7 +199,7 @@ void GptVoidTimer::reset(void)
 
 
 
-uint32_t GptVoidTimer::getCounter(void) const
+uint32_t GptVoidTimer::getCounter(void)
 {
 	return lpcTimers_[this->timerNumber_]->TC;
 }

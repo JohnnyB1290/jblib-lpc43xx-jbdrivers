@@ -120,7 +120,7 @@ void PwmVoidTimer::reset(void)
 
 
 
-uint32_t PwmVoidTimer::getCounter(void) const
+uint32_t PwmVoidTimer::getCounter(void)
 {
 	return LPC_MCPWM->TC[this->number_];
 }

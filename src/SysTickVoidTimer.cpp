@@ -96,7 +96,7 @@ void SysTickVoidTimer::reset(void)
 
 
 
-uint32_t SysTickVoidTimer::getCounter(void) const
+uint32_t SysTickVoidTimer::getCounter(void)
 {
 	return SysTick->VAL;
 }

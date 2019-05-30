@@ -120,7 +120,7 @@ void RiVoidTimer::reset(void)
 
 
 
-uint32_t RiVoidTimer::getCounter(void) const
+uint32_t RiVoidTimer::getCounter(void)
 {
 	return LPC_RITIMER->COUNTER;
 }

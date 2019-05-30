@@ -67,8 +67,10 @@ private:
 			NVM_PARAMETERS_CELL_DATA_SIZE;
 	static NvmParameters* nvmParameters_;
 	static NvmParametersHeader_t* parametersHeader_;
-	static uint8_t parametersHeaderSize_;
-	static uint8_t parametersCellSize_;
+	static const uint32_t parametersHeaderSize_ =
+			sizeof(NvmParametersHeader_t);
+	static const uint32_t parametersCellSize_ =
+			sizeof(NvmParametersCell_t);
 	NvmParametersCell_t lastSetCell_;
 	IVoidCallback* changeCallback_ = NULL;
 };

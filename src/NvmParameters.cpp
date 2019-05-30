@@ -29,10 +29,12 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include "NvmParameters.hpp"
 #include "Eeprom.hpp"
 #include "Crc.hpp"
+#if USE_CONSOLE
+#include <stdio.h>
+#endif
 
 namespace jblib::jbdrivers
 {
@@ -43,8 +45,6 @@ using namespace	jbutilities;
 NvmParameters* NvmParameters::nvmParameters_ = (NvmParameters*)NULL;
 NvmParametersHeader_t* NvmParameters::parametersHeader_ =
 		(NvmParametersHeader_t*)NVM_PARAMETERS_BASE_ADDRESS;
-uint8_t NvmParameters::parametersHeaderSize_ = sizeof(NvmParametersHeader_t);
-uint8_t NvmParameters::parametersCellSize_ = sizeof(NvmParametersCell_t);
 
 
 

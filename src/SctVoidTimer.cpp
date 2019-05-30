@@ -125,7 +125,7 @@ void SctVoidTimer::reset(void)
 
 
 
-uint32_t SctVoidTimer::getCounter(void) const
+uint32_t SctVoidTimer::getCounter(void)
 {
 	return LPC_SCT->COUNT_U;
 }
