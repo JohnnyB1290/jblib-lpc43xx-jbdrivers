@@ -151,7 +151,8 @@ ErrorCode_t RndisUsbDeviceRom::initialize(USBD_HANDLE_T usbHandle, USB_CORE_DESC
 void RndisUsbDeviceRom::getParameter(const UsbRomDeviceParameters_t parameter,
 		void* const value)
 {
-
+	if(parameter == USB_DEVICE_PARAMETER_RNDIS_ADAPTER_MAC)
+		*((uint8_t**)value) = this->adapterMac_.Octets;
 }
 
 
@@ -963,7 +964,7 @@ bool RndisUsbDeviceRom::processRndisSet(uint32_t oid, void* setData, uint16_t se
 			/* Set the RNDIS state to initialized if the packet filter is non-zero */
 			if(this->currentPacketFilter_) {
 				this->currentRndisState_ = RNDIS_Data_Initialized;
-				this->isTxUnlocked_ = 1;
+				this->isTxUnlocked_ = true;
 			}
 			else
 				this->currentRndisState_ = RNDIS_Initialized;

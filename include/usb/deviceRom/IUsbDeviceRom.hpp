@@ -42,7 +42,7 @@ namespace jblib::jbdrivers
 class  IUsbDeviceRom
 {
 public:
-	IUsbDeviceRom(){}
+	IUsbDeviceRom(void){}
 	virtual ~IUsbDeviceRom(void){}
 	virtual ErrorCode_t initialize(USBD_HANDLE_T usbHandle, USB_CORE_DESCS_T* descriptors,
 			USBD_API_INIT_PARAM_T* initParameters) = 0;

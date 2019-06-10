@@ -45,6 +45,8 @@ namespace jblib::jbdrivers
 using namespace jbkernel;
 
 EthernetPhy* EthernetPhy::ethernetPhy_ = (EthernetPhy*)NULL;
+uint8_t EthernetPhy::mac_[6] = {0,0,0,0,0,0};
+
 
 
 EthernetPhy* EthernetPhy::getEthernetPhy(void)
@@ -370,7 +372,7 @@ void EthernetPhy::initialize(void)
 	}
 
 #if !ETHERNET_PHY_USE_MII
-	if(this->phyType_ == DP83848M)
+	if(this->phyType_ == PHY_TYPE_DP83848M)
 		lpc_mii_write(DP8_PHY_RBR_REG, DP8_RBR_RMII_MODE);
 #endif
 
@@ -425,7 +427,8 @@ void EthernetPhy::initialize(void)
 	/* Clear all MAC interrupts */
 	LPC_ETHERNET->DMA_STAT = DMA_ST_ALL;
 	/* Enable MAC interrupts */
-	LPC_ETHERNET->DMA_INT_EN = DMA_IE_TIE|DMA_IE_TSE|DMA_IE_TJE|DMA_IE_OVE|DMA_IE_UNE|DMA_IE_RUE|DMA_IE_RSE|DMA_IE_RWE|DMA_IE_ETE|DMA_IE_FBE|DMA_IE_AIE|DMA_IE_NIE;
+	LPC_ETHERNET->DMA_INT_EN = DMA_IE_TIE | DMA_IE_TSE | DMA_IE_TJE | DMA_IE_OVE | DMA_IE_UNE |
+			DMA_IE_RUE | DMA_IE_RSE | DMA_IE_RWE | DMA_IE_ETE | DMA_IE_FBE | DMA_IE_AIE | DMA_IE_NIE;
 
 	#ifdef CORE_M4
 	uint32_t prioritygroup = NVIC_GetPriorityGrouping();

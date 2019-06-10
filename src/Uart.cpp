@@ -117,7 +117,7 @@ void Uart::initialize(void* (* const mallocFunc)(size_t),
 		const uint16_t txBufferSize, IChannelCallback* const callback)
 {
 	if(!this->initialized_) {
-		if(txBufferSize_ == 0)
+		if(txBufferSize == 0)
 			return;
 		this->txBufferSize_ = txBufferSize;
 		this->txBuffer_ = (uint8_t*)mallocFunc(this->txBufferSize_);

@@ -536,15 +536,15 @@ uint8_t UsbDeviceRomController::stringDescriptorUsb0_[] = {
 	/* Index 0x02: Product */
 	(9 * 2 + 2),						/* bLength (9 Char + Type + length) */
 	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
-	'K', 0,
-	'T', 0,
-	'P', 0,
-	' ', 0,
-	'M', 0,
-	'o', 0,
-	'd', 0,
-	'e', 0,
-	'm', 0,
+	'J', 0,
+	'B', 0,
+	'L', 0,
+	'I', 0,
+	'B', 0,
+	'R', 0,
+	'A', 0,
+	'R', 0,
+	'Y', 0,
 	/* Index 0x03: Serial Number */
 	(8 * 2 + 2),						/* bLength (8 Char + Type + length) */
 	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
@@ -604,7 +604,7 @@ uint8_t UsbDeviceRomController::stringDescriptorUsb0_[] = {
 	'C', 0,
 	'O', 0,
 	'M', 0,
-#ifdef MCS_BOOT
+#if USE_MSC_DEVICE_ROM
 	/* Index 0x06: Interface 1, Alternate Setting 0 */
 	(6 * 2 + 2),						/* bLength (6 Char + Type + length) */
 	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
@@ -863,15 +863,15 @@ uint8_t UsbDeviceRomController::stringDescriptorUsb1_[] = {
 	/* Index 0x02: Product */
 	(9 * 2 + 2),						/* bLength (9 Char + Type + length) */
 	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
-	'K', 0,
-	'T', 0,
-	'P', 0,
-	' ', 0,
-	'M', 0,
-	'o', 0,
-	'd', 0,
-	'e', 0,
-	'm', 0,
+	'J', 0,
+	'B', 0,
+	'L', 0,
+	'I', 0,
+	'B', 0,
+	'R', 0,
+	'A', 0,
+	'R', 0,
+	'Y', 0,
 	/* Index 0x03: Serial Number */
 	(8 * 2 + 2),						/* bLength (8 Char + Type + length) */
 	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
