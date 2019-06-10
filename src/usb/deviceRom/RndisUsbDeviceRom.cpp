@@ -241,8 +241,12 @@ void RndisUsbDeviceRom::getParameter(const uint8_t number, void* const value)
 
 void RndisUsbDeviceRom::setParameter(const uint8_t number, void* const value)
 {
-	if(number == PARAMETER_TX_UNLOCK)
-		this->isTxUnlocked_ = *(uint32_t*)value;
+	if(number == PARAMETER_TX_UNLOCK){
+		if(*(uint32_t*)value)
+			this->isTxUnlocked_ = true;
+		else
+			this->isTxUnlocked_ = false;
+	}
 	else if(number == PARAMETER_MAC)
 		memcpy((char*)this->mac_, value, 6);
 	else if(number == PARAMETER_NAME)

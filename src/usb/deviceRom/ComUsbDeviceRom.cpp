@@ -166,7 +166,7 @@ void ComUsbDeviceRom::setParameter(const UsbRomDeviceParameters_t parameter,
 		void* const value)
 {
 	if(parameter == USB_DEVICE_PARAMETER_USB_NUMBER)
-		this->usbNumber = *((uint8_t*)value);
+		this->usbNumber = *((uint32_t*)value);
 }
 
 

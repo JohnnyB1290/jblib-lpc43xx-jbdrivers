@@ -478,10 +478,18 @@ void EthernetPhy::getParameter(const uint8_t number, void* const value)
 {
 	if(number == PARAMETER_MAC)
 		*((uint8_t**)value) = EthernetPhy::mac_;
-	else if(number == PARAMETER_LINK)
-		*((uint8_t*)value) = this->checkLink();
-	else if(number == PARAMETER_TX_UNLOCK)
-		*((uint8_t*)value) = this->isTxUnlocked_;
+	else if(number == PARAMETER_LINK){
+		if(this->checkLink())
+			*((uint32_t*)value) = 1;
+		else
+			*((uint32_t*)value) = 0;
+	}
+	else if(number == PARAMETER_TX_UNLOCK){
+		if(this->isTxUnlocked_)
+			*((uint32_t*)value) = 1;
+		else
+			*((uint32_t*)value) = 0;
+	}
 	else if(number == PARAMETER_NAME)
 		*((char**)value) = (char*)this->name_;
 }
@@ -492,8 +500,12 @@ void EthernetPhy::setParameter(const uint8_t number, void* const value)
 {
 	if(number == PARAMETER_MAC)
 		memcpy(EthernetPhy::mac_, value, 6);
-	else if(number == PARAMETER_TX_UNLOCK)
-		this->isTxUnlocked_ = *((bool*)value);
+	else if(number == PARAMETER_TX_UNLOCK){
+		if(*((uint32_t*)value))
+			this->isTxUnlocked_ = true;
+		else
+			this->isTxUnlocked_ = false;
+	}
 	else if(number == PARAMETER_NAME)
 		memcpy(this->name_, value, 9);
 	else if(number == PARAMETER_SPEED)

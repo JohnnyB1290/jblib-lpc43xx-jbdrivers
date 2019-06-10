@@ -68,7 +68,7 @@ private:
 	static UsbDeviceRomController* usbDeviceRomControllers_[USB_NUM_MODULES];
 	IUsbDeviceRom** devices_ = NULL;
 	uint8_t devicesSize_ = 0;
-	uint8_t usbNumber_ = 0;
+	uint32_t usbNumber_ = 0;
 	USBD_HANDLE_T handle_ = NULL;
 	uint32_t ep0RxBusyFlag_ = 0;/* flag indicating whether EP0 OUT/RX buffer is busy. */
 	USB_EP_HANDLER_T ep0BaseHandler_ = NULL;	/* variable to store the pointer to base EP0 handler */

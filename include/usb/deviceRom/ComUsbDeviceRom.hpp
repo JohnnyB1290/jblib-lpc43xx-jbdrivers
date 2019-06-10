@@ -74,7 +74,7 @@ public:
 	uint8_t isChannelInitialized = 0;
 	uint16_t controlLineState = 0;
 	CDC_LINE_CODING lineCode;
-	uint8_t isConnected = 0;
+	uint32_t isConnected = 0;
 	uint32_t cts = 0;
 	RINGBUFF_T txRingBuffer;
 	uint8_t usbTxBuffer[USB_HS_MAX_BULK_PACKET];
