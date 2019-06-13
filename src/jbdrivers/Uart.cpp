@@ -28,7 +28,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include <stdlib.h>
-#include "Uart.hpp"
+#include "jbdrivers/Uart.hpp"
 
 namespace jblib::jbdrivers
 {

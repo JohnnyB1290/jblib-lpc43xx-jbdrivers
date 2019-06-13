@@ -27,7 +27,7 @@
 
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "SysTickVoidTimer.hpp"
+#include "jbdrivers/SysTickVoidTimer.hpp"
 
 namespace jblib::jbdrivers
 {

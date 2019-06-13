@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief JbController M4 Core class definition
+ * @brief JbController M0 Core class definition
  *
  *
  * @note
@@ -23,8 +23,8 @@
  * This file is a part of JB_Lib.
  */
 
-#ifndef JBCONTROLLERM4_HPP_
-#define JBCONTROLLERM4_HPP_
+#ifndef JBCONTROLLERM0_HPP_
+#define JBCONTROLLERM0_HPP_
 
 #include <stdint.h>
 #include "jb_common.h"
@@ -54,12 +54,6 @@ public:
 	static void gpioOn(uint8_t number);
 	static void gpioOff(uint8_t number);
 	static void gpioTgl(uint8_t number);
-	static void startM0App(uint32_t imageAddress);
-	static void startM0Sub(uint32_t imageAddress);
-	static void copyFwToRam(uint32_t flashAddress, uint32_t ramAddress, uint32_t size);
-	static void resetPeriphery(void);
-	static void softReset(void);
-	static void goToApp(uint32_t applicationAddress);
 	static uint32_t getHeapFree(void);
 #if USE_CONSOLE
 	static Console* getConsole(void)
@@ -68,8 +62,10 @@ public:
 	}
 #endif
 
+protected:
+	static BoardGpio_t boardGpios_[];
+
 private:
-	static const BoardGpio_t boardGpios_[];
 	static bool isInitialized;
 	static IVoidCallback* mainProcedures_[JBCONTROLLER_NUM_MAIN_PROCEDURES];
 	static void* mainProceduresParameters_[JBCONTROLLER_NUM_MAIN_PROCEDURES];
@@ -77,4 +73,6 @@ private:
 
 }
 
-#endif /*  JBCONTROLLERM4_HPP_ */
+
+
+#endif /*  JBCONTROLLERM0_HPP_ */

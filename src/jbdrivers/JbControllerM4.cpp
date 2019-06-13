@@ -36,7 +36,7 @@ namespace jblib::jbdrivers
 
 using namespace jbkernel;
 
-const BoardGpio_t JbController::boardGpios_[] = JBCONTROLLER_BOARD_GPIOS;
+BoardGpio_t JbController::boardGpios_[] = JBCONTROLLER_BOARD_GPIOS;
 bool JbController::isInitialized = false;
 IVoidCallback* JbController::mainProcedures_[JBCONTROLLER_NUM_MAIN_PROCEDURES];
 void* JbController::mainProceduresParameters_[JBCONTROLLER_NUM_MAIN_PROCEDURES];
