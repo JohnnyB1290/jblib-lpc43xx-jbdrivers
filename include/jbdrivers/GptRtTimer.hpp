@@ -26,9 +26,9 @@
 #ifndef GPTRTTIMER_HPP_
 #define GPTRTTIMER_HPP_
 
-#include "jb_common.h"
-#include "IRtTimer.hpp"
-#include "IrqController.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbkernel/IRtTimer.hpp"
+#include "jbdrivers/IrqController.hpp"
 
 #if !defined GPT_TIMERS_NUM
 #define GPT_TIMERS_NUM 					4

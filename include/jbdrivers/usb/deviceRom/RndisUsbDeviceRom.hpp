@@ -26,10 +26,10 @@
 #ifndef RNDIS_USB_DEVICE_ROM_HPP_
 #define RNDIS_USB_DEVICE_ROM_HPP_
 
-#include "jb_common.h"
-#include "usb/deviceRom/RndisUsbDeviceRomDefines.h"
-#include "usb/deviceRom/IUsbDeviceRom.hpp"
-#include "IVoidEthernet.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbdrivers/usb/deviceRom/RndisUsbDeviceRomDefines.h"
+#include "jbdrivers/usb/deviceRom/IUsbDeviceRom.hpp"
+#include "jbkernel/IVoidEthernet.hpp"
 
 namespace jblib::jbdrivers
 {

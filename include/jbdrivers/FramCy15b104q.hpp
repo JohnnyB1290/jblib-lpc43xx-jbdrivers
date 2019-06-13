@@ -26,8 +26,8 @@
 #ifndef FRAMCY15B104Q_HPP_
 #define FRAMCY15B104Q_HPP_
 
-#include "jb_common.h"
-#include "Ssp.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbdrivers/Ssp.hpp"
 
 namespace jblib::jbdrivers
 {

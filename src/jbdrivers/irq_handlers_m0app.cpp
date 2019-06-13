@@ -30,7 +30,7 @@
 
 #ifdef CORE_M0APP
 
-#include "IrqController.hpp"
+#include "jbdrivers/IrqController.hpp"
 
 namespace jblib::jbdrivers
 {

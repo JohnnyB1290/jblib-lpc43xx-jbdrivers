@@ -25,7 +25,7 @@
 #ifndef WDT_HPP_
 #define WDT_HPP_
 
-#include "jb_common.h"
+#include "jbkernel/jb_common.h"
 
 namespace jblib::jbdrivers
 {

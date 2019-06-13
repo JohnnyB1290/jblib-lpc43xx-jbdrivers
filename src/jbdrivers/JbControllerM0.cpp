@@ -25,7 +25,7 @@
 
 #ifdef CORE_M0
 #include <string.h>
-#include "JbControllerM0.hpp"
+#include "jbdrivers/JbControllerM0.hpp"
 
 namespace jblib::jbdrivers
 {

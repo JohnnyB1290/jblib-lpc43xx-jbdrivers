@@ -28,7 +28,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include <string.h>
-#include "usb/deviceRom/UsbDeviceRomController.hpp"
+#include "jbdrivers/usb/deviceRom/UsbDeviceRomController.hpp"
 #if (USE_CONSOLE && USB_DEVICE_ROM_USE_CONSOLE)
 #include <stdio.h>
 #endif

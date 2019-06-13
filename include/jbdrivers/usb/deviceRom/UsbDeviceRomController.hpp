@@ -26,9 +26,9 @@
 #ifndef USB_DEVICE_ROM_CONTROLLER_HPP_
 #define USB_DEVICE_ROM_CONTROLLER_HPP_
 
-#include "jb_common.h"
-#include "IrqController.hpp"
-#include "IUsbDeviceRom.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbdrivers/IrqController.hpp"
+#include "jbdrivers/usb/deviceRom/IUsbDeviceRom.hpp"
 
 #if !defined USB_NUM_MODULES
 #define USB_NUM_MODULES			2

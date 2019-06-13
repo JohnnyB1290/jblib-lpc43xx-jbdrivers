@@ -29,7 +29,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "Spifi.hpp"
+#include "jbdrivers/Spifi.hpp"
 #if (USE_CONSOLE && SPIFI_USE_CONSOLE)
 #include <stdio.h>
 #endif

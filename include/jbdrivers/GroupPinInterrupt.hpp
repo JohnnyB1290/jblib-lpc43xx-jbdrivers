@@ -26,8 +26,8 @@
 #ifndef GROUPPININTERRUPT_HPP_
 #define GROUPPININTERRUPT_HPP_
 
-#include "jb_common.h"
-#include "IrqController.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbdrivers/IrqController.hpp"
 
 #if !defined GROUP_PIN_INTERRUPT_NUM_GROUPS
 #define GROUP_PIN_INTERRUPT_NUM_GROUPS 		2

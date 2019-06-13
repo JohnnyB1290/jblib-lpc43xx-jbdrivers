@@ -30,7 +30,7 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "usb/deviceRom/RndisUsbDeviceRom.hpp"
+#include "jbdrivers/usb/deviceRom/RndisUsbDeviceRom.hpp"
 
 #if (USE_CONSOLE && USB_DEVICE_ROM_USE_CONSOLE)
 #include <stdio.h>

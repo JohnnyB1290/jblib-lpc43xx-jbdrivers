@@ -26,10 +26,10 @@
 #ifndef SYSTICKVOIDTIMER_HPP_
 #define SYSTICKVOIDTIMER_HPP_
 
-#include "jb_common.h"
-#include "IVoidTimer.hpp"
-#include "callback_interfaces.hpp"
-#include "IrqController.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbkernel/IVoidTimer.hpp"
+#include "jbkernel/callback_interfaces.hpp"
+#include "jbdrivers/IrqController.hpp"
 
 namespace jblib::jbdrivers
 {

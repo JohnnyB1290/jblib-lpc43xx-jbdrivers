@@ -26,7 +26,7 @@
 #ifndef I2CMASTER_HPP_
 #define I2CMASTER_HPP_
 
-#include "jb_common.h"
+#include "jbkernel/jb_common.h"
 
 #if !defined I2C_NUM
 #define I2C_NUM			2

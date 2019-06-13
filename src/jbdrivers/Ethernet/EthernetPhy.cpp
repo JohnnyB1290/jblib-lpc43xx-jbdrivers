@@ -29,8 +29,8 @@
 
 #include <string.h>
 #include "lpc_phy.h"
-#include "ethernet/EthernetPhy.hpp"
-#include "JbController.hpp"
+#include "jbdrivers/ethernet/EthernetPhy.hpp"
+#include "jbdrivers/JbController.hpp"
 
 #if (USE_CONSOLE && ETHERNET_PHY_USE_CONSOLE)
 #include <stdio.h>

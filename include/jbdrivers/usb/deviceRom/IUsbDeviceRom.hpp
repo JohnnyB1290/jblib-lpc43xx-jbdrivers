@@ -26,7 +26,7 @@
 #ifndef IUSB_DEVICE_ROM_HPP_
 #define IUSB_DEVICE_ROM_HPP_
 
-#include "jb_common.h"
+#include "jbkernel/jb_common.h"
 #include "error.h"
 #include "usbd_rom/usbd_rom_api.h"
 

@@ -26,9 +26,9 @@
 #ifndef COM_USB_DEVICE_ROM_HPP_
 #define COM_USB_DEVICE_ROM_HPP_
 
-#include "jb_common.h"
-#include "IUsbDeviceRom.hpp"
-#include "IVoidChannel.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbdrivers/usb/deviceRom/IUsbDeviceRom.hpp"
+#include "jbkernel/IVoidChannel.hpp"
 
 namespace jblib::jbdrivers
 {

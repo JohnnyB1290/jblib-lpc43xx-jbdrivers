@@ -29,7 +29,7 @@
 
 #ifdef CORE_M4
 #include <string.h>
-#include "JbControllerM4.hpp"
+#include "jbdrivers/JbControllerM4.hpp"
 
 namespace jblib::jbdrivers
 {

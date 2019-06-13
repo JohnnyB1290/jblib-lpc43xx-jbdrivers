@@ -26,7 +26,7 @@
 #ifndef SGPIOSPIMASTER_HPP_
 #define SGPIOSPIMASTER_HPP_
 
-#include "jb_common.h"
+#include "jbkernel/jb_common.h"
 
 namespace jblib::jbdrivers
 {

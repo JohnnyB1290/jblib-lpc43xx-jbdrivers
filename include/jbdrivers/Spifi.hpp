@@ -26,7 +26,7 @@
 #ifndef SPIFI_HPP_
 #define SPIFI_HPP_
 
-#include "jb_common.h"
+#include "jbkernel/jb_common.h"
 #include "SPIFI/spifilib_api.h"
 
 namespace jblib::jbdrivers

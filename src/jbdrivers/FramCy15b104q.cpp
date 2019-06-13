@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cstring>
-#include "FramCy15b104q.hpp"
+#include "jbdrivers/FramCy15b104q.hpp"
 #if (USE_CONSOLE && FRAM_CY15B104Q_USE_CONSOLE)
 #include <stdio.h>
 #endif

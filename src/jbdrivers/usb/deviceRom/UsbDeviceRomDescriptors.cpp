@@ -29,7 +29,7 @@
 
 #if USB_DEVICE_ROM_USE_CUSTOM_DESCRIPTORS == 0
 
-#include "usb/deviceRom/UsbDeviceRomController.hpp"
+#include "jbdrivers/usb/deviceRom/UsbDeviceRomController.hpp"
 
 namespace jblib::jbdrivers
 {

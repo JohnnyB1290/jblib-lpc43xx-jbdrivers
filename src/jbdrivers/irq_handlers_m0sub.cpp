@@ -30,7 +30,7 @@
 
 #ifdef CORE_M0SUB
 
-#include "IrqController.hpp"
+#include "jbdrivers/IrqController.hpp"
 
 namespace jblib::jbdrivers
 {

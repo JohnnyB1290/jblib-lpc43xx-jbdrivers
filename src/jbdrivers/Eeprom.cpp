@@ -28,8 +28,8 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include <string.h>
-#include "Eeprom.hpp"
-#include "JbController.hpp"
+#include "jbdrivers/Eeprom.hpp"
+#include "jbdrivers/JbController.hpp"
 
 namespace jblib::jbdrivers
 {

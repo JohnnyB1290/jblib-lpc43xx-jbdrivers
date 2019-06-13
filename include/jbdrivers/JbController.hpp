@@ -27,10 +27,10 @@
 #define JBCONTROLLER_HPP_
 
 #ifdef CORE_M4
-#include "JbControllerM4.hpp"
+#include "jbdrivers/JbControllerM4.hpp"
 #endif
 #ifdef CORE_M0
-#include "JbControllerM0.hpp"
+#include "jbdrivers/JbControllerM0.hpp"
 #endif
 
 

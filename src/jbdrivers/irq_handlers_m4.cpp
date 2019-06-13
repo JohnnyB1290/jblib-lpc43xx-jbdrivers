@@ -29,7 +29,7 @@
 
 #ifdef CORE_M4
 
-#include "IrqController.hpp"
+#include "jbdrivers/IrqController.hpp"
 
 namespace jblib::jbdrivers
 {

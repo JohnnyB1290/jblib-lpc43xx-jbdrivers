@@ -29,9 +29,9 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "NvmParameters.hpp"
-#include "Eeprom.hpp"
-#include "Crc.hpp"
+#include "jbdrivers/NvmParameters.hpp"
+#include "jbdrivers/Eeprom.hpp"
+#include "jbutilities/Crc.hpp"
 #if USE_CONSOLE
 #include <stdio.h>
 #endif

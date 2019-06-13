@@ -27,7 +27,7 @@
 #ifndef RNDIS_USB_DEVICE_ROM_DEFINES_H_
 #define RNDIS_USB_DEVICE_ROM_DEFINES_H_
 
-#include "jbopt.h"
+#include "jbkernel/jbopt.h"
 
 #ifdef __cplusplus
 extern "C" {

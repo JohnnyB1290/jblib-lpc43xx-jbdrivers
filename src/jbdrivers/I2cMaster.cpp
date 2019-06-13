@@ -27,7 +27,7 @@
 
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "I2cMaster.hpp"
+#include "jbdrivers/I2cMaster.hpp"
 
 namespace jblib::jbdrivers
 {

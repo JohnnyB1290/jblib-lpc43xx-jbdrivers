@@ -26,8 +26,8 @@
 #ifndef PININTERRUPT_HPP_
 #define PININTERRUPT_HPP_
 
-#include "jb_common.h"
-#include "IrqController.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbdrivers/IrqController.hpp"
 
 #if !defined PIN_INTERRUPT_NUM_CHANNELS
 #define PIN_INTERRUPT_NUM_CHANNELS 		8

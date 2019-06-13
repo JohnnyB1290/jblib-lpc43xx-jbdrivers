@@ -27,12 +27,12 @@
 #define JBCONTROLLERM0_HPP_
 
 #include <stdint.h>
-#include "jb_common.h"
-#include "callback_interfaces.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbkernel/callback_interfaces.hpp"
 
 #if USE_CONSOLE
 #include <stdio.h>
-#include "Console.hpp"
+#include "jbkernel/Console.hpp"
 #endif
 
 namespace jblib::jbdrivers

@@ -26,10 +26,10 @@
 #ifndef GPTVOIDTIMER_HPP_
 #define GPTVOIDTIMER_HPP_
 
-#include "jb_common.h"
-#include "IVoidTimer.hpp"
-#include "callback_interfaces.hpp"
-#include "IrqController.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbkernel/IVoidTimer.hpp"
+#include "jbkernel/callback_interfaces.hpp"
+#include "jbdrivers/IrqController.hpp"
 
 #if !defined GPT_TIMERS_NUM
 #define GPT_TIMERS_NUM 			4

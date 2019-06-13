@@ -26,10 +26,10 @@
 #ifndef ETHERNETPHY_HPP_
 #define ETHERNETPHY_HPP_
 
-#include "jb_common.h"
-#include "callback_interfaces.hpp"
-#include "IVoidEthernet.hpp"
-#include "IrqController.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbkernel/callback_interfaces.hpp"
+#include "jbkernel/IVoidEthernet.hpp"
+#include "jbdrivers/IrqController.hpp"
 
 namespace jblib::jbdrivers
 {

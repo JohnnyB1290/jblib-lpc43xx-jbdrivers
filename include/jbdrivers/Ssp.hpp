@@ -26,7 +26,7 @@
 #ifndef SSP_HPP_
 #define SSP_HPP_
 
-#include "jb_common.h"
+#include "jbkernel/jb_common.h"
 
 #if !defined SSP_NUM_MODULES
 #define SSP_NUM_MODULES			2

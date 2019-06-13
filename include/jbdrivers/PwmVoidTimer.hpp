@@ -26,10 +26,10 @@
 #ifndef PWMVOIDTIMER_HPP_
 #define PWMVOIDTIMER_HPP_
 
-#include "jb_common.h"
-#include "IVoidTimer.hpp"
-#include "callback_interfaces.hpp"
-#include "IrqController.hpp"
+#include "jbkernel/jb_common.h"
+#include "jbkernel/IVoidTimer.hpp"
+#include "jbkernel/callback_interfaces.hpp"
+#include "jbdrivers/IrqController.hpp"
 
 #if !defined PWM_TIMERS_NUM
 #define PWM_TIMERS_NUM 			3
