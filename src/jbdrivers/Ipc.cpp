@@ -71,7 +71,7 @@ Ipc* Ipc::getIpc(uint8_t gate)
 
 
 
-Ipc::Ipc(uint8_t gate) : IIPC(), IIrqListener()
+Ipc::Ipc(uint8_t gate) : IIpc(), IIrqListener()
 {
 	uint32_t interruptPriority = 0;
 	switch(gate)
