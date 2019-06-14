@@ -151,6 +151,8 @@ Ipc::Ipc(uint8_t gate) : IIpc(), IIrqListener()
 	this->writeQueue_->itemSize = sizeof(IpcMsg_t);
 	this->writeQueue_->data = (uint8_t*)this->writeQueueData_;
 	this->writeQueue_->valid = IPC_QUEUE_MAGIC_VALID;
+	this->writeQueue_->head = 0;
+	this->writeQueue_->tail = 0;
 
 	this->setCode((uint64_t)1 << this->irqN_);
 	IrqController::getIrqController()->addPeripheralIrqListener(this);
