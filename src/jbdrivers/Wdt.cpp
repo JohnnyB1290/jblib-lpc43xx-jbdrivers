@@ -71,9 +71,9 @@ void Wdt::start(void)
 
 void Wdt::reset(void)
 {
-	__disable_irq();
+	disableInterrupts();
 	Chip_WWDT_Feed(LPC_WWDT);
-	__enable_irq();
+	enableInterrupts();
 }
 
 

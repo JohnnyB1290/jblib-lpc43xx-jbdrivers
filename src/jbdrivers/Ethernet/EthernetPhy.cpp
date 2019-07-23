@@ -163,7 +163,7 @@ void EthernetPhy::addToTxQueue(EthernetFrame* const frame, uint16_t frameSize)
 {
 	if(frameSize){
 		if(this->isTxUnlocked_) {
-			__disable_irq();
+			disableInterrupts();
 			if(!this->isTxQueueFull()) {
 				memcpy((uint8_t*)&(this->txQueue_.frames[this->txQueue_.bw]), frame, frameSize);
 				this->txQueue_.bdTxPtrs[this->txQueue_.bw]->BSIZE = frameSize;
@@ -179,7 +179,7 @@ void EthernetPhy::addToTxQueue(EthernetFrame* const frame, uint16_t frameSize)
 				printf("Ethernet PHY: Error! TX Queue is FULL\n\r");
 				#endif
 			}
-			__enable_irq();
+			enableInterrupts();
 		}
 	}
 }
@@ -194,7 +194,7 @@ void EthernetPhy::addToTxQueue(struct pbuf* p)
 		if(size == 0)
 			return;
 
-		__disable_irq();
+		disableInterrupts();
 		if(!this->isTxQueueFull()) {
 			if(p->next != NULL) {
 				uint16_t frameIndex = 0;
@@ -220,7 +220,7 @@ void EthernetPhy::addToTxQueue(struct pbuf* p)
 			printf("Ethernet PHY: Error! TX Queue is FULL\n\r");
 			#endif
 		}
-		__enable_irq();
+		enableInterrupts();
 	}
 }
 #endif

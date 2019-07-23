@@ -50,14 +50,14 @@ IrqController::IrqController()
 		this->cortexIrqListeners_[i] = (IIrqListener*)NULL;
 	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_PERIPHERAL_LISTENERS; i++)
 		this->peripheralIrqListeners_[i] = (IIrqListener*)NULL;
-	__enable_irq();
+	enableInterrupts();
 }
 
 
 
 void IrqController::addCortexIrqListener(IIrqListener* const listener)
 {
-	__disable_irq();
+	disableInterrupts();
 	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_CORTEX_LISTENERS; i++) {
 		if(this->cortexIrqListeners_[i] == listener)
 			break;
@@ -66,14 +66,14 @@ void IrqController::addCortexIrqListener(IIrqListener* const listener)
 			break;
 		}
 	}
-	__enable_irq();
+	enableInterrupts();
 }
 
 
 
 void IrqController::addPeripheralIrqListener(IIrqListener* const listener)
 {
-	__disable_irq();
+	disableInterrupts();
 	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_PERIPHERAL_LISTENERS; i++) {
 		if(this->peripheralIrqListeners_[i] == listener)
 			break;
@@ -82,7 +82,7 @@ void IrqController::addPeripheralIrqListener(IIrqListener* const listener)
 			break;
 		}
 	}
-	__enable_irq();
+	enableInterrupts();
 }
 
 
@@ -90,7 +90,7 @@ void IrqController::addPeripheralIrqListener(IIrqListener* const listener)
 void IrqController::deleteCortexIrqListener(IIrqListener* const listener)
 {
 	uint32_t index = 0;
-	__disable_irq();
+	disableInterrupts();
 	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_CORTEX_LISTENERS; i++) {
 		if(this->cortexIrqListeners_[i] == listener)
 			break;
@@ -108,7 +108,7 @@ void IrqController::deleteCortexIrqListener(IIrqListener* const listener)
 				break;
 		}
 	}
-	__enable_irq();
+	enableInterrupts();
 }
 
 
@@ -116,7 +116,7 @@ void IrqController::deleteCortexIrqListener(IIrqListener* const listener)
 void IrqController::deletePeripheralIrqListener(IIrqListener* const listener)
 {
 	uint32_t index = 0;
-	__disable_irq();
+	disableInterrupts();
 	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_PERIPHERAL_LISTENERS; i++) {
 		if(this->peripheralIrqListeners_[i] == listener)
 			break;
@@ -134,7 +134,7 @@ void IrqController::deletePeripheralIrqListener(IIrqListener* const listener)
 				break;
 		}
 	}
-	__enable_irq();
+	enableInterrupts();
 }
 
 

@@ -111,7 +111,7 @@ NvmParametersCell_t* NvmParameters::getParameter(char* description,
 
 void NvmParameters::setParameter(NvmParametersCell_t* cell)
 {
-	__disable_irq();
+	disableInterrupts();
 	NvmParametersHeader_t tempHeader;
 	memcpy(&tempHeader, parametersHeader_, parametersHeaderSize_);
 
@@ -130,7 +130,7 @@ void NvmParameters::setParameter(NvmParametersCell_t* cell)
 			parametersHeaderSize_);
 	if(cell->uid != 0xFF)
 		memcpy((void*)&this->lastSetCell_, (void*)cell, parametersCellSize_);
-	__enable_irq();
+	enableInterrupts();
 
 	uint32_t callbackParameter = cell->uid;
 	if((cell->uid != 0xFF) && (this->changeCallback_ != (IVoidCallback*)NULL))
@@ -177,7 +177,7 @@ void NvmParameters::deleteParameter(char* description)
 {
 	if(parametersHeader_->size == 0)
 		return;
-	__disable_irq();
+	disableInterrupts();
 
 	NvmParametersHeader_t tempHeader;
 	memcpy(&tempHeader, parametersHeader_, parametersHeaderSize_);
@@ -190,7 +190,7 @@ void NvmParameters::deleteParameter(char* description)
 		tailSize = tailSize * parametersCellSize_;
 		void* tempData = malloc_s(tailSize);
 		if(tempData == NULL){
-			__enable_irq();
+			enableInterrupts();
 			return;
 		}
 		memcpy(tempData, (void*)((uint32_t)cell + parametersCellSize_), tailSize);
@@ -202,21 +202,21 @@ void NvmParameters::deleteParameter(char* description)
 					tempHeader.size * parametersCellSize_);
 	Eeprom::getEeprom()->write((uint32_t)parametersHeader_, (uint8_t*)&tempHeader,
 			parametersHeaderSize_);
-	__enable_irq();
+	enableInterrupts();
 }
 
 
 
 void NvmParameters::eraseAllParameters(void)
 {
-	__disable_irq();
+	disableInterrupts();
 	NvmParametersHeader_t tempHeader;
 	memset(&tempHeader, 0, NvmParameters::parametersHeaderSize_);
 	tempHeader.magic = NVM_PARAMETERS_MAGIC;
 	tempHeader.size = 0;
 	Eeprom::getEeprom()->write((uint32_t)parametersHeader_,
 			(uint8_t*)&tempHeader,parametersHeaderSize_);
-	__enable_irq();
+	enableInterrupts();
 }
 
 
@@ -238,11 +238,11 @@ uint32_t NvmParameters::getParametersSize(void)
 
 void NvmParameters::setAllParameters(void* ptr)
 {
-	__disable_irq();
+	disableInterrupts();
 	Eeprom::getEeprom()->write((uint32_t)parametersHeader_, (uint8_t*)ptr,
 			parametersHeaderSize_ +
 			parametersCellSize_ * ((NvmParametersHeader_t*)ptr)->size);
-	__enable_irq();
+	enableInterrupts();
 }
 
 

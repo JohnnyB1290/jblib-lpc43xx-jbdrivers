@@ -47,7 +47,7 @@ void JbController::initialize(void)
 			mainProceduresParameters_[i] = NULL;
 		}
 		SystemCoreClockUpdate();
-		__enable_irq();
+		enableInterrupts();
 		isInitialized = true;
 	}
 }
@@ -172,14 +172,14 @@ void JbController::deleteMainProcedure(IVoidCallback* callback)
 uint32_t JbController::getHeapFree(void)
 {
     uint32_t ret = 10;
-    __disable_irq();
+    disableInterrupts();
     void* ptr = malloc(ret);
     while(ptr != NULL){
         free(ptr);
         ret += 10;
         ptr = malloc(ret);
     }
-    __enable_irq();
+    enableInterrupts();
     return ret;
 }
 

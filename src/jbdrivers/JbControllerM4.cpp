@@ -52,7 +52,7 @@ void JbController::initialize(void)
 		}
 		SystemCoreClockUpdate();
 		NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_3);
-		__enable_irq();
+		enableInterrupts();
 
 		Chip_GPIO_Init(LPC_GPIO_PORT);
 		Chip_Clock_Enable(CLK_MX_SCU);
@@ -150,9 +150,9 @@ void JbController::startM0Sub(uint32_t imageAddress)
 
 void JbController::copyFwToRam(uint32_t flashAddress, uint32_t ramAddress, uint32_t size)
 {
-	__disable_irq();
+	disableInterrupts();
 	memcpy((void*)ramAddress, (void*)flashAddress, size);
-	__enable_irq();
+	enableInterrupts();
 }
 
 
@@ -249,7 +249,7 @@ void JbController::softReset(void)
 
 void JbController::goToApp(uint32_t applicationAddress)
 {
-	__disable_irq();
+	disableInterrupts();
 	LPC_CREG->MXMEMMAP = applicationAddress & ~0xFFF;
 	JbController::delayUs(100);
 	JbController::softReset();
@@ -334,14 +334,14 @@ void JbController::deleteMainProcedure(IVoidCallback* callback)
 uint32_t JbController::getHeapFree(void)
 {
     uint32_t ret = 10;
-    __disable_irq();
+    disableInterrupts();
     void* ptr = malloc(ret);
     while(ptr != NULL){
         free(ptr);
         ret += 10;
         ptr = malloc(ret);
     }
-    __enable_irq();
+    enableInterrupts();
     return ret;
 }
 
