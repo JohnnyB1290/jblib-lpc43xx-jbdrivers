@@ -49,8 +49,8 @@ SysTickVoidTimer* SysTickVoidTimer::getSysTickVoidTimer(void)
 
 SysTickVoidTimer::SysTickVoidTimer(void) : IVoidTimer(), IIrqListener()
 {
-	this->setCode((uint64_t)1<<(-SysTick_IRQn));
-	IrqController::getIrqController()->addCortexIrqListener(this);
+	IrqController::getIrqController()->
+			addIrqListener(this, SysTick_IRQn);
 }
 
 
@@ -58,9 +58,8 @@ SysTickVoidTimer::SysTickVoidTimer(void) : IVoidTimer(), IIrqListener()
 void SysTickVoidTimer::initialize(uint32_t us)
 {
 	#ifdef CORE_M4
-	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(SysTick_IRQn,
-			NVIC_EncodePriority(prioritygroup, SYS_TICK_INTERRUPT_PRIORITY, 0));
+	IrqController::getIrqController()->
+			setPriority(SysTick_IRQn, SYS_TICK_INTERRUPT_PRIORITY);
 	#endif
 	SysTick->LOAD  = ((SystemCoreClock / 1000000) * us) - 1;
 	SysTick->VAL   = 0;
@@ -133,13 +132,12 @@ void SysTickVoidTimer::deleteCallback(void)
 void SysTickVoidTimer::deinitialize(void)
 {
 	this->stop();
-	IrqController::getIrqController()->deleteCortexIrqListener(this);
 	this->reset();
 }
 
 
 
-void SysTickVoidTimer::irqHandler(int8_t irqNumber)
+void SysTickVoidTimer::irqHandler(int irqNumber)
 {
 	if(this->callback_)
 		this->callback_->voidCallback((void*)this, NULL);

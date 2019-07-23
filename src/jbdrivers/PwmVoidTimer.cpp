@@ -56,13 +56,12 @@ PwmVoidTimer* PwmVoidTimer::getPwmVoidTimer(uint8_t number)
 PwmVoidTimer::PwmVoidTimer(uint8_t number) : IVoidTimer(), IIrqListener()
 {
 	this->number_ = number;
-	this->setCode((uint64_t)1 << MCPWM_IRQn);
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+	IrqController::getIrqController()->addIrqListener(this, MCPWM_IRQn);
 }
 
 
 
-void PwmVoidTimer::irqHandler(int8_t irqNumber)
+void PwmVoidTimer::irqHandler(int irqNumber)
 {
 	if((LPC_MCPWM->INTF) & (1 << (4 * (this->number_)))) {
 		LPC_MCPWM->INTF_CLR = 1 << (4 * (this->number_));
@@ -76,16 +75,9 @@ void PwmVoidTimer::irqHandler(int8_t irqNumber)
 void PwmVoidTimer::initialize(uint32_t us)
 {
 	Chip_Clock_EnableOpts(CLK_APB1_MOTOCON, true, true, 1);
-	#ifdef CORE_M4
-	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(MCPWM_IRQn,
-			NVIC_EncodePriority(prioritygroup, PWM_TIMER_INTERRUPT_PRIORITY, 0));
-	#endif
-	#ifdef CORE_M0
-	NVIC_SetPriority(MCPWM_IRQn, PWM_TIMER_INTERRUPT_PRIORITY);
-	#endif
-	NVIC_EnableIRQ(MCPWM_IRQn);
-
+	IrqController::getIrqController()->
+			setPriority(MCPWM_IRQn, PWM_TIMER_INTERRUPT_PRIORITY);
+	IrqController::getIrqController()->enableInterrupt(MCPWM_IRQn);
 	uint32_t period = Chip_Clock_GetRate(CLK_APB1_MOTOCON) / 1000000;
 	LPC_MCPWM->LIM[this->number_] = (period * us);
 	LPC_MCPWM->INTEN_SET = 1 << ((this->number_) * 4);
@@ -164,8 +156,7 @@ void PwmVoidTimer::deinitialize(void)
 		temp |= LPC_MCPWM->INTEN & (1 << ((this->number_) * 4));
 
 	if(temp == 0) {
-		NVIC_DisableIRQ(MCPWM_IRQn);
-		NVIC_ClearPendingIRQ(MCPWM_IRQn);
+		IrqController::getIrqController()->disableInterrupt(MCPWM_IRQn);
 		Chip_RGU_TriggerReset(RGU_MOTOCONPWM_RST);
 		while (Chip_RGU_InReset(RGU_MOTOCONPWM_RST)) {}
 		Chip_Clock_Disable(CLK_APB1_MOTOCON);

@@ -42,32 +42,32 @@ extern "C" {
 #endif
 
 void M0S_NMI_Handler(void){
-	irqController->handleCortexIrq(NonMaskableInt_IRQn);
+	irqController->handleIrq(NonMaskableInt_IRQn);
 	while(1);
 }
 
 void M0S_HardFault_Handler(void){
-	irqController->handleCortexIrq(HardFault_IRQn);
+	irqController->handleIrq(HardFault_IRQn);
 	while(1);
 }
 
 void M0S_SVC_Handler(void){
-	irqController->handleCortexIrq(SVCall_IRQn);
+	irqController->handleIrq(SVCall_IRQn);
 	while(1);
 }
 
 void M0S_DebugMon_Handler(void){
-	irqController->handleCortexIrq(DebugMonitor_IRQn);
+	irqController->handleIrq(DebugMonitor_IRQn);
 	while(1);
 }
 
 void M0S_PendSV_Handler(void){
-	irqController->handleCortexIrq(PendSV_IRQn);
+	irqController->handleIrq(PendSV_IRQn);
 	while(1);
 }
 
 void M0S_SysTick_Handler(void){
-	irqController->handleCortexIrq(SysTick_IRQn);
+	irqController->handleIrq(SysTick_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -75,113 +75,113 @@ void M0S_DAC_IRQHandler(void){
 #else
 void M0S_RTC_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(DAC_IRQn);
+	irqController->handleIrq(DAC_IRQn);
 }
 
 void M0S_M4CORE_IRQHandler(void){
-	irqController->handlePeripheralIrq(M4_IRQn);
+	irqController->handleIrq(M4_IRQn);
 }
 
 void M0S_DMA_IRQHandler(void){
-	irqController->handlePeripheralIrq(DMA_IRQn);
+	irqController->handleIrq(DMA_IRQn);
 }
 
 void M0S_SGPIO_INPUT_IRQHandler(void){
-	irqController->handlePeripheralIrq(SGPIO_INPUT_IRQn);
+	irqController->handleIrq(SGPIO_INPUT_IRQn);
 }
 
 void M0S_SGPIO_MATCH_IRQHandler(void){
-	irqController->handlePeripheralIrq(SGPIO_MATCH_IRQn);
+	irqController->handleIrq(SGPIO_MATCH_IRQn);
 }
 
 void M0S_SGPIO_SHIFT_IRQHandler(void){
-	irqController->handlePeripheralIrq(SGPIO_SHIFT_IRQn);
+	irqController->handleIrq(SGPIO_SHIFT_IRQn);
 }
 
 void M0S_SGPIO_POS_IRQHandler(void){
-	irqController->handlePeripheralIrq(SGPIO_POS_IRQn);
+	irqController->handleIrq(SGPIO_POS_IRQn);
 }
 
 void M0S_USB0_IRQHandler(void){
-	irqController->handlePeripheralIrq(USB0_IRQn);
+	irqController->handleIrq(USB0_IRQn);
 }
 
 void M0S_USB1_IRQHandler(void){
-	irqController->handlePeripheralIrq(USB1_IRQn);
+	irqController->handleIrq(USB1_IRQn);
 }
 
 void M0S_SCT_IRQHandler(void){
-	irqController->handlePeripheralIrq(SCT_IRQn);
+	irqController->handleIrq(SCT_IRQn);
 }
 
 void M0S_RITIMER_IRQHandler(void){
-	irqController->handlePeripheralIrq(RITIMER_IRQn);
+	irqController->handleIrq(RITIMER_IRQn);
 }
 
 void M0S_GINT1_IRQHandler(void){
-	irqController->handlePeripheralIrq(GINT1_IRQn);
+	irqController->handleIrq(GINT1_IRQn);
 }
 
 void M0S_TIMER1_IRQHandler(void){
-	irqController->handlePeripheralIrq(TIMER1_IRQn);
+	irqController->handleIrq(TIMER1_IRQn);
 }
 
 void M0S_TIMER2_IRQHandler(void){
-	irqController->handlePeripheralIrq(TIMER2_IRQn);
+	irqController->handleIrq(TIMER2_IRQn);
 }
 
 void M0S_PIN_INT5_IRQHandler(void){
-	irqController->handlePeripheralIrq(PIN_INT5_IRQn);
+	irqController->handleIrq(PIN_INT5_IRQn);
 }
 
 void M0S_MCPWM_IRQHandler(void){
-	irqController->handlePeripheralIrq(MCPWM_IRQn);
+	irqController->handleIrq(MCPWM_IRQn);
 }
 
 void M0S_ADC0_IRQHandler(void){
-	irqController->handlePeripheralIrq(ADC0_IRQn);
+	irqController->handleIrq(ADC0_IRQn);
 }
 
 void M0S_I2C0_IRQHandler(void){
-	irqController->handlePeripheralIrq(I2C0_IRQn);
+	irqController->handleIrq(I2C0_IRQn);
 }
 
 void M0S_I2C1_IRQHandler(void){
-	irqController->handlePeripheralIrq(I2C1_IRQn);
+	irqController->handleIrq(I2C1_IRQn);
 }
 
 void M0S_SPI_IRQHandler(void){
-	irqController->handlePeripheralIrq(SPI_INT_IRQn);
+	irqController->handleIrq(SPI_INT_IRQn);
 }
 
 void M0S_ADC1_IRQHandler(void){
-	irqController->handlePeripheralIrq(ADC1_IRQn);
+	irqController->handleIrq(ADC1_IRQn);
 }
 
 void M0S_SSP0_OR_SSP1_IRQHandler(void){
-	irqController->handlePeripheralIrq(SSP0_IRQn);
-	irqController->handlePeripheralIrq(SSP1_IRQn);
+	irqController->handleIrq(SSP0_IRQn);
+	irqController->handleIrq(SSP1_IRQn);
 }
 
 void M0S_EVENTROUTER_IRQHandler(void){
-	irqController->handlePeripheralIrq(EVENTROUTER_IRQn);
+	irqController->handleIrq(EVENTROUTER_IRQn);
 }
 
 void M0S_USART0_IRQHandler(void){
-	irqController->handlePeripheralIrq(USART0_IRQn);
+	irqController->handleIrq(USART0_IRQn);
 }
 
 void M0S_UART1_IRQHandler(void){
-	irqController->handlePeripheralIrq(UART1_IRQn);
+	irqController->handleIrq(UART1_IRQn);
 }
 
 void M0S_USART2_OR_C_CAN1_IRQHandler(void){
-	irqController->handlePeripheralIrq(USART2_IRQn);
-	irqController->handlePeripheralIrq(C_CAN1_IRQn);
+	irqController->handleIrq(USART2_IRQn);
+	irqController->handleIrq(C_CAN1_IRQn);
 }
 
 void M0S_USART3_IRQHandler(void){
-	irqController->handlePeripheralIrq(USART3_IRQn);
+	irqController->handleIrq(USART3_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -189,12 +189,12 @@ void M0S_I2C0_OR_I2C1_OR_I2S1_OR_QEI_IRQHandler(void){
 #else
 void M0S_I2S0_OR_I2S1_OR_QEI_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(I2S0_IRQn);
-	irqController->handlePeripheralIrq(I2S1_IRQn);
+	irqController->handleIrq(I2S0_IRQn);
+	irqController->handleIrq(I2S1_IRQn);
 }
 
 void M0S_C_CAN0_IRQHandler(void){
-	irqController->handlePeripheralIrq(C_CAN0_IRQn);
+	irqController->handleIrq(C_CAN0_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -202,12 +202,12 @@ void M0S_SPIFI_OR_VADC_IRQHandler(void){
 #else
 void M0S_SPIFI_OR_ADCHS_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(ADCHS_IRQn);
-	irqController->handlePeripheralIrq(SPIFI_IRQn);
+	irqController->handleIrq(ADCHS_IRQn);
+	irqController->handleIrq(SPIFI_IRQn);
 }
 
 void M0S_M0APP_IRQHandler(void){
-	irqController->handlePeripheralIrq(M0APP_IRQn);
+	irqController->handleIrq(M0APP_IRQn);
 }
 
 #ifdef __cplusplus

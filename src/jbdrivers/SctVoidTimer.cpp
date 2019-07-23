@@ -49,13 +49,12 @@ SctVoidTimer* SctVoidTimer::getSctVoidTimer(void)
 
 SctVoidTimer::SctVoidTimer(void) : IVoidTimer(), IIrqListener()
 {
-	this->setCode((uint64_t)1<<SCT_IRQn);
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+	IrqController::getIrqController()->addIrqListener(this, SCT_IRQn);
 }
 
 
 
-void SctVoidTimer::irqHandler(int8_t irqNumber)
+void SctVoidTimer::irqHandler(int irqNumber)
 {
 	if(LPC_SCT->EVFLAG & 1) {
 		Chip_SCT_ClearEventFlag(LPC_SCT, SCT_EVT_0);
@@ -75,25 +74,15 @@ void SctVoidTimer::initialize(uint32_t us)
 	Chip_SCT_Config(LPC_SCT,
 			SCT_CONFIG_32BIT_COUNTER | SCT_CONFIG_CLKMODE_BUSCLK |
 			SCT_CONFIG_AUTOLIMIT_L | SCT_CONFIG_NORELOADL_U);
-
-	#ifdef CORE_M4
-	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(SCT_IRQn,
-			NVIC_EncodePriority(prioritygroup, SCT_TIMER_INTERRUPT_PRIORITY, 0));
-	#endif
-	#ifdef CORE_M0
-	NVIC_SetPriority(SCT_IRQn, SCT_TIMER_INTERRUPT_PRIORITY);
-	#endif
-
 	uint32_t period = (Chip_Clock_GetRate(CLK_MX_SCT) / 1000000);
 	period = period * us;
 	Chip_SCT_SetMatchCount(LPC_SCT, SCT_MATCH_0, period);
 	Chip_SCT_EnableEventInt(LPC_SCT, SCT_EVT_0);
 	LPC_SCT->EVENT[0].CTRL = 1|(1 << 12); //EVENT0 == MATCH0, use match only
 	LPC_SCT->EVENT[0].STATE = 1; //EVENT0 in STATE0
-
-	NVIC_ClearPendingIRQ(SCT_IRQn);
-	NVIC_EnableIRQ(SCT_IRQn);
+	IrqController::getIrqController()->
+			setPriority(SCT_IRQn, SCT_TIMER_INTERRUPT_PRIORITY);
+	IrqController::getIrqController()->enableInterrupt(SCT_IRQn);
 }
 
 
@@ -158,17 +147,15 @@ void SctVoidTimer::deleteCallback(void)
 	Chip_SCT_DisableEventInt(LPC_SCT, SCT_EVT_0);
 	LPC_SCT->EVENT[0].CTRL = 0;
 	LPC_SCT->EVENT[0].STATE = 0;
-	NVIC_DisableIRQ(SCT_IRQn);
-	NVIC_ClearPendingIRQ(SCT_IRQn);
 }
 
 
 
 void SctVoidTimer::deinitialize(void)
 {
-	IrqController::getIrqController()->deletePeripheralIrqListener(this);
 	this->stop();
-	NVIC_DisableIRQ(SCT_IRQn);
+	IrqController::getIrqController()->
+			disableInterrupt(SCT_IRQn);
 	Chip_RGU_TriggerReset(RGU_SCT_RST);
 	while (Chip_RGU_InReset(RGU_SCT_RST)) {}
 	Chip_SCT_DeInit(LPC_SCT);

@@ -64,7 +64,7 @@ private:
 	static uint8_t mac_[6];
 
 	EthernetPhy(void);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 	bool checkLink(void);
 	void sendHandler(void);
 	void errorHandler(void);

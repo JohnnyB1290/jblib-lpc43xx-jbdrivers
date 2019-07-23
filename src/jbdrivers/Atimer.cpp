@@ -49,13 +49,12 @@ Atimer* Atimer::getAtimer(void)
 
 Atimer::Atimer(void) : IIrqListener()
 {
-	this->setCode((uint64_t)1<<EVENTROUTER_IRQn);
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+	IrqController::getIrqController()->addIrqListener(this, EVENTROUTER_IRQn);
 }
 
 
 
-void Atimer::irqHandler(int8_t irqNumber)
+void Atimer::irqHandler(int irqNumber)
 {
 	if (Chip_EVRT_IsSourceInterrupting(EVRT_SRC_ATIMER)) {
 		if(this->callback_ != NULL)
@@ -75,18 +74,9 @@ void Atimer::initialize(uint8_t periodS)
 	Chip_EVRT_Init();
 	Chip_EVRT_ConfigIntSrcActiveType(EVRT_SRC_ATIMER, EVRT_SRC_ACTIVE_HIGH_LEVEL);
 	Chip_EVRT_SetUpIntSrc(EVRT_SRC_ATIMER, ENABLE);
-
-	#ifdef CORE_M4
-	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(EVENTROUTER_IRQn,
-			NVIC_EncodePriority(prioritygroup, EVENT_ROUTER_INTERRUPT_PRIORITY, 0));
-	#endif
-	#ifdef CORE_M0
-	NVIC_SetPriority(EVENTROUTER_IRQn, EVENT_ROUTER_INTERRUPT_PRIORITY);
-	#endif
-
-	NVIC_ClearPendingIRQ(EVENTROUTER_IRQn);
-	NVIC_EnableIRQ(EVENTROUTER_IRQn);
+	IrqController::getIrqController()->
+			setPriority(EVENTROUTER_IRQn, EVENT_ROUTER_INTERRUPT_PRIORITY);
+	IrqController::getIrqController()->enableInterrupt(EVENTROUTER_IRQn);
 	Chip_ATIMER_ClearIntStatus(LPC_ATIMER);
 	Chip_EVRT_ClrPendIntSrc(EVRT_SRC_ATIMER);
 }
@@ -109,9 +99,8 @@ void Atimer::stop(void)
 
 void Atimer::deinitialize(void)
 {
-	IrqController::getIrqController()->deletePeripheralIrqListener(this);
-	NVIC_DisableIRQ(EVENTROUTER_IRQn);
-	NVIC_ClearPendingIRQ(EVENTROUTER_IRQn);
+	IrqController::getIrqController()->deleteIrqListener(this);
+	IrqController::getIrqController()->disableInterrupt(EVENTROUTER_IRQn);
 	Chip_ATIMER_DeInit(LPC_ATIMER);
 	Chip_EVRT_SetUpIntSrc(EVRT_SRC_ATIMER, DISABLE);
 	this->callback_ = NULL;

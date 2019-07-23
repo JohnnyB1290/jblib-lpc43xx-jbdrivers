@@ -66,10 +66,6 @@ UsbDeviceRomController* UsbDeviceRomController::getUsbDeviceRomController(uint8_
 UsbDeviceRomController::UsbDeviceRomController(uint8_t usbNumber) : IIrqListener(), IVoidCallback()
 {
 	this->usbNumber_ = usbNumber;
-	if(usbNumber_ == 0)
-		this->setCode((uint64_t)1<<USB0_IRQn);
-	if(usbNumber_ == 1)
-		this->setCode((uint64_t)1<<USB1_IRQn);
 }
 
 
@@ -98,21 +94,17 @@ void UsbDeviceRomController::connect(void)
 
 void UsbDeviceRomController::reset(void)
 {
-	IrqController::getIrqController()->deletePeripheralIrqListener(this);
-	if(this->usbNumber_ == 0) {
-		NVIC_DisableIRQ(USB0_IRQn);
-		NVIC_ClearPendingIRQ(USB0_IRQn);
-	}
-	else if(this->usbNumber_ == 1){
-		NVIC_DisableIRQ(USB1_IRQn);
-		NVIC_ClearPendingIRQ(USB1_IRQn);
-	}
+	IrqController::getIrqController()->deleteIrqListener(this);
+	if(this->usbNumber_ == 0)
+		IrqController::getIrqController()->disableInterrupt(USB0_IRQn);
+	else if(this->usbNumber_ == 1)
+		IrqController::getIrqController()->disableInterrupt(USB1_IRQn);
 	usbRomApi_->hw->Reset(this->handle_);
 }
 
 
 
-void UsbDeviceRomController::irqHandler(int8_t irqNumber)
+void UsbDeviceRomController::irqHandler(int irqNumber)
 {
 	usbRomApi_->hw->ISR(this->handle_);
 }
@@ -269,30 +261,20 @@ void UsbDeviceRomController::initialize(IUsbDeviceRom** devices, uint8_t devices
 		}
 	}
 
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+	if(usbNumber_ == 0)
+		IrqController::getIrqController()->addIrqListener(this, USB0_IRQn);
+	else if(usbNumber_ == 1)
+		IrqController::getIrqController()->addIrqListener(this, USB1_IRQn);
+
 	if(this->usbNumber_ == 0) {
-		#ifdef CORE_M4
-		uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-		NVIC_SetPriority(USB0_IRQn,
-				NVIC_EncodePriority(prioritygroup, USB_0_INTERRUPT_PRIORITY, 0));
-		#endif
-		#ifdef CORE_M0
-		NVIC_SetPriority(USB0_IRQn, USB_0_INTERRUPT_PRIORITY);
-		#endif
-		NVIC_ClearPendingIRQ(USB0_IRQn);
-		NVIC_EnableIRQ(USB0_IRQn);
+		IrqController::getIrqController()->
+				setPriority(USB0_IRQn, USB_0_INTERRUPT_PRIORITY);
+		IrqController::getIrqController()->enableInterrupt(USB0_IRQn);
 	}
 	else if(this->usbNumber_ == 1) {
-		#ifdef CORE_M4
-		uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-		NVIC_SetPriority(USB1_IRQn,
-				NVIC_EncodePriority(prioritygroup, USB_1_INTERRUPT_PRIORITY, 0));
-		#endif
-		#ifdef CORE_M0
-		NVIC_SetPriority(USB1_IRQn, USB_1_INTERRUPT_PRIORITY);
-		#endif
-		NVIC_ClearPendingIRQ(USB1_IRQn);
-		NVIC_EnableIRQ(USB1_IRQn);
+		IrqController::getIrqController()->
+				setPriority(USB1_IRQn, USB_1_INTERRUPT_PRIORITY);
+		IrqController::getIrqController()->enableInterrupt(USB1_IRQn);
 	}
 	UsbDeviceRomController::usbRomApi_->hw->Connect(this->handle_, 1);
 }

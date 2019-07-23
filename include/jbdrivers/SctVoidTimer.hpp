@@ -52,7 +52,7 @@ public:
 
 private:
 	SctVoidTimer(void);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 
 	static SctVoidTimer* sctVoidTimer_;
 	IVoidCallback* callback_ = NULL;

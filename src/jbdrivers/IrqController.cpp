@@ -32,140 +32,100 @@
 namespace jblib::jbdrivers
 {
 
+using namespace jbutilities;
+
 IrqController* IrqController::irqController_ = NULL;
 
 
 IrqController* IrqController::getIrqController(void)
 {
-	if(IrqController::irqController_ == NULL)
-		IrqController::irqController_ = new IrqController();
-	return IrqController::irqController_;
+	if(irqController_ == NULL)
+		irqController_ = new IrqController();
+	return irqController_;
 }
 
 
 
-IrqController::IrqController()
+IrqController::IrqController(void)
 {
-	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_CORTEX_LISTENERS; i++)
-		this->cortexIrqListeners_[i] = (IIrqListener*)NULL;
-	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_PERIPHERAL_LISTENERS; i++)
-		this->peripheralIrqListeners_[i] = (IIrqListener*)NULL;
-	enableInterrupts();
+	this->listenersList_ = new LinkedList<ListenersListItem>();
 }
 
 
 
-void IrqController::addCortexIrqListener(IIrqListener* const listener)
+void IrqController::enableInterrupt(int irqNumber)
 {
-	disableInterrupts();
-	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_CORTEX_LISTENERS; i++) {
-		if(this->cortexIrqListeners_[i] == listener)
-			break;
-		if(this->cortexIrqListeners_[i] == (IIrqListener*)NULL) {
-			this->cortexIrqListeners_[i] = listener;
-			break;
-		}
-	}
-	enableInterrupts();
+	NVIC_ClearPendingIRQ((IRQn_Type)irqNumber);
+	NVIC_EnableIRQ((IRQn_Type)irqNumber);
 }
 
 
 
-void IrqController::addPeripheralIrqListener(IIrqListener* const listener)
+void IrqController::disableInterrupt(int irqNumber)
 {
-	disableInterrupts();
-	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_PERIPHERAL_LISTENERS; i++) {
-		if(this->peripheralIrqListeners_[i] == listener)
-			break;
-		if(this->peripheralIrqListeners_[i] == (IIrqListener*)NULL) {
-			this->peripheralIrqListeners_[i] = listener;
-			break;
-		}
-	}
-	enableInterrupts();
+	NVIC_DisableIRQ((IRQn_Type)irqNumber);
+	NVIC_ClearPendingIRQ((IRQn_Type)irqNumber);
 }
 
 
 
-void IrqController::deleteCortexIrqListener(IIrqListener* const listener)
+void IrqController::setPriority(int irqNumber, uint32_t priority)
 {
-	uint32_t index = 0;
-	disableInterrupts();
-	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_CORTEX_LISTENERS; i++) {
-		if(this->cortexIrqListeners_[i] == listener)
-			break;
-		else
-			index++;
-	}
-	if(index == (IRQ_CONTROLLER_NUM_CORTEX_LISTENERS-1)){
-		if(this->cortexIrqListeners_[index] == listener)
-			this->cortexIrqListeners_[index] = (IIrqListener*)NULL;
-	}
-	else {
-		for(uint32_t i = index; i < (IRQ_CONTROLLER_NUM_CORTEX_LISTENERS-1); i++) {
-			this->cortexIrqListeners_[i] = this->cortexIrqListeners_[i+1];
-			if(this->cortexIrqListeners_[i+1] == (IIrqListener*)NULL)
+	#ifdef CORE_M4
+	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
+	NVIC_SetPriority(irqNumber,
+			NVIC_EncodePriority(prioritygroup, priority, 0));
+	#endif
+	#ifdef CORE_M0
+	NVIC_SetPriority((IRQn_Type)irqNumber, priority);
+	#endif
+}
+
+
+
+void IrqController::addIrqListener(IIrqListener* const listener, int irqNumber)
+{
+	ListenersListItem* newItem = new ListenersListItem();
+	newItem->listener = listener;
+	newItem->irqNumber = irqNumber;
+	this->listenersList_->insertLast(newItem);
+}
+
+
+
+void IrqController::deleteIrqListener(IIrqListener* const listener)
+{
+	if(!this->listenersList_->isEmpty()){
+		LinkedList<ListenersListItem>::LinkIterator* iterator =
+				this->listenersList_->getIterator();
+		iterator->reset();
+		while(1){
+			if(iterator->getCurrent()->listener == listener)
+				free_s(iterator->deleteCurrent());
+			if(!iterator->atEnd())
+				iterator->nextLink();
+			else
 				break;
 		}
 	}
-	enableInterrupts();
 }
 
 
 
-void IrqController::deletePeripheralIrqListener(IIrqListener* const listener)
+void IrqController::handleIrq(const int irqNumber)
 {
-	uint32_t index = 0;
-	disableInterrupts();
-	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_PERIPHERAL_LISTENERS; i++) {
-		if(this->peripheralIrqListeners_[i] == listener)
-			break;
-		else
-			index++;
-	}
-	if(index == (IRQ_CONTROLLER_NUM_PERIPHERAL_LISTENERS-1)) {
-		if(this->peripheralIrqListeners_[index] == listener)
-			this->peripheralIrqListeners_[index] = (IIrqListener*)NULL;
-	}
-	else {
-		for(uint32_t i = index; i < (IRQ_CONTROLLER_NUM_PERIPHERAL_LISTENERS-1); i++) {
-			this->peripheralIrqListeners_[i] = this->peripheralIrqListeners_[i+1];
-			if(this->peripheralIrqListeners_[i+1] == (IIrqListener*)NULL)
+	if(!this->listenersList_->isEmpty()){
+		LinkedList<ListenersListItem>::LinkIterator* iterator =
+				this->listenersList_->getIterator();
+		iterator->reset();
+		while(1){
+			if(iterator->getCurrent()->irqNumber == irqNumber)
+				iterator->getCurrent()->listener->irqHandler(irqNumber);
+			if(!iterator->atEnd())
+				iterator->nextLink();
+			else
 				break;
 		}
-	}
-	enableInterrupts();
-}
-
-
-
-void IrqController::handleCortexIrq(const int8_t irqNumber)
-{
-	int8_t absIrqNumber = (irqNumber < 0) ? (-irqNumber) : irqNumber;
-
-	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_CORTEX_LISTENERS; i++){
-		if(this->cortexIrqListeners_[i]) {
-			if( ((this->cortexIrqListeners_[i]->getCode()) >> absIrqNumber) & 1 )
-				this->cortexIrqListeners_[i]->irqHandler(irqNumber);
-		}
-		else
-			break;
-	}
-}
-
-
-
-void IrqController::handlePeripheralIrq(const int8_t irqNumber)
-{
-	int8_t absIrqNumber = (irqNumber < 0) ? (-irqNumber) : irqNumber;
-
-	for(uint32_t i = 0; i < IRQ_CONTROLLER_NUM_PERIPHERAL_LISTENERS; i++) {
-		if(this->peripheralIrqListeners_[i]) {
-			if( ((this->peripheralIrqListeners_[i]->getCode()) >> absIrqNumber) & 1 )
-				this->peripheralIrqListeners_[i]->irqHandler(irqNumber);
-		}
-		else
-			break;
 	}
 }
 

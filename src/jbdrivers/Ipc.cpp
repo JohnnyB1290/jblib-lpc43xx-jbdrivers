@@ -154,19 +154,10 @@ Ipc::Ipc(uint8_t gate) : IIpc(), IIrqListener()
 	this->writeQueue_->head = 0;
 	this->writeQueue_->tail = 0;
 
-	this->setCode((uint64_t)1 << this->irqN_);
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
-
-	#ifdef CORE_M0
-	NVIC_SetPriority(this->irqN_, interruptPriority);
-	#endif
-	#ifdef CORE_M4
-	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(this->irqN_,
-			NVIC_EncodePriority(prioritygroup, interruptPriority, 0));
-	#endif
-	NVIC_ClearPendingIRQ(this->irqN_);
-	NVIC_EnableIRQ(this->irqN_);
+	IrqController::getIrqController()->addIrqListener(this, this->irqN_);
+	IrqController::getIrqController()->
+			setPriority(this->irqN_, interruptPriority);
+	IrqController::getIrqController()->enableInterrupt(this->irqN_);
 }
 
 
@@ -212,7 +203,7 @@ void Ipc::deleteIpcListener(IIpcListener* listener)
 
 
 
-void Ipc::irqHandler(int8_t irqNumber)
+void Ipc::irqHandler(int irqNumber)
 {
 	this->clearTxEvent_();
 	if (!IPC_QUEUE_IS_VALID(this->readQueue_))

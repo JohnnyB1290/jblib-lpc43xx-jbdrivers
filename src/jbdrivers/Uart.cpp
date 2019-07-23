@@ -84,8 +84,8 @@ void Uart::constructor(uint8_t number, uint32_t baudrate)
 {
 	this->number_ = number;
 	this->baudrate_ = baudrate;
-	this->setCode((uint64_t)1 << Uart::uartIrqNs_[this->number_]);
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+	IrqController::getIrqController()->
+			addIrqListener(this, uartIrqNs_[this->number_]);
 }
 
 
@@ -140,24 +140,17 @@ void Uart::initialize(void* (* const mallocFunc)(size_t),
 		/* Enable receive data and line status interrupt */
 		Chip_UART_IntEnable(Uart::lpcUarts_[this->number_], UART_IER_RBRINT);
 		Chip_UART_TXEnable(Uart::lpcUarts_[this->number_]);
-
-		#ifdef CORE_M4
-		uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-		NVIC_SetPriority(Uart::uartIrqNs_[this->number_],
-				NVIC_EncodePriority(prioritygroup, Uart::uartInterruptPriorities_[this->number_], 0));
-		#endif
-		#ifdef CORE_M0
-		NVIC_SetPriority(Uart::uartIrqNs_[this->number_], Uart::uartInterruptPriorities_[this->number_]);
-		#endif
-		NVIC_ClearPendingIRQ(Uart::uartIrqNs_[this->number_]);
-		NVIC_EnableIRQ(Uart::uartIrqNs_[this->number_]);
+		IrqController::getIrqController()->setPriority(uartIrqNs_[this->number_],
+				uartInterruptPriorities_[this->number_]);
+		IrqController::getIrqController()->
+				enableInterrupt(uartIrqNs_[this->number_]);
 		this->initialized_ = true;
 	}
 }
 
 
 
-void Uart::irqHandler(int8_t irqNumber)
+void Uart::irqHandler(int irqNumber)
 {
 	static uint8_t byte = 0;
 	if(this->initialized_) {
@@ -196,7 +189,8 @@ void Uart::deinitialize(void)
 
 Uart::~Uart(void)
 {
-	NVIC_DisableIRQ(Uart::uartIrqNs_[this->number_]);
+	IrqController::getIrqController()->
+			disableInterrupt(uartIrqNs_[this->number_]);
 }
 
 

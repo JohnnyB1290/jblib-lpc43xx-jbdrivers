@@ -141,13 +141,13 @@ GptRtTimer::GptRtTimer(uint8_t timerNumber) : IRtTimer(), IIrqListener()
 	this->timerNumber_ = timerNumber;
 	for(uint32_t i = 0; i < GPT_TIMERS_NUM_MATCHES; i++)
 		this->matchCallbacks_[i] = (IVoidCallback*)NULL;
-	this->setCode((uint64_t)1 << (this->irqNumbers_[this->timerNumber_]));
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+	IrqController::getIrqController()->addIrqListener(this,
+			this->irqNumbers_[this->timerNumber_]);
 }
 
 
 
-void GptRtTimer::irqHandler(int8_t irqNumber)
+void GptRtTimer::irqHandler(int irqNumber)
 {
 	static uint8_t matchNumber;
 	for(uint32_t i = 0; i< GPT_TIMERS_NUM_MATCHES; i++) {
@@ -168,17 +168,9 @@ void GptRtTimer::initialize(void)
 	Chip_RGU_TriggerReset(this->resetNumbers_[this->timerNumber_]);
 	while (Chip_RGU_InReset(this->resetNumbers_[this->timerNumber_])) {}
 	Chip_TIMER_Reset(this->lpcTimers_[this->timerNumber_]);
-
-	#ifdef CORE_M0
-	NVIC_SetPriority(this->irqNumbers_[this->timerNumber_], this->interruptPriorities_[this->timerNumber_]);
-	#endif
-	#ifdef CORE_M4
-	uint32_t priorityGroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(this->irqNumbers_[this->timerNumber_],
-			NVIC_EncodePriority(priorityGroup, this->interruptPriorities_[this->timerNumber_], 0));
-	#endif
-	NVIC_ClearPendingIRQ(this->irqNumbers_[this->timerNumber_]);
-	NVIC_EnableIRQ(this->irqNumbers_[this->timerNumber_]);
+	IrqController::getIrqController()->setPriority(this->irqNumbers_[this->timerNumber_],
+					this->interruptPriorities_[this->timerNumber_]);
+	IrqController::getIrqController()->enableInterrupt(this->irqNumbers_[this->timerNumber_]);
 }
 
 
@@ -253,7 +245,8 @@ void GptRtTimer::deleteMatchCallback(const uint8_t matchNumber)
 void GptRtTimer::deinitialize(void)
 {
 	this->stop();
-	NVIC_DisableIRQ(this->irqNumbers_[this->timerNumber_]);
+	IrqController::getIrqController()->
+			disableInterrupt(this->irqNumbers_[this->timerNumber_]);
 	Chip_RGU_TriggerReset(this->resetNumbers_[this->timerNumber_]);
 	while (Chip_RGU_InReset(this->resetNumbers_[this->timerNumber_])) {}
 	Chip_TIMER_DeInit(this->lpcTimers_[this->timerNumber_]);

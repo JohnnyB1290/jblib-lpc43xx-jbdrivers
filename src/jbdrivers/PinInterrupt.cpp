@@ -91,8 +91,9 @@ PinInterrupt::PinInterrupt(uint8_t number) : IIrqListener()
 {
 	this->number_ = number;
 	this->callback_ = (IVoidCallback*)NULL;
-	this->setCode((uint64_t)1<<(pinInterruptIrqNs_[this->number_]));
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+
+	IrqController::getIrqController()->
+			addIrqListener(this, pinInterruptIrqNs_[this->number_]);
 }
 
 
@@ -147,15 +148,8 @@ void PinInterrupt::initialize(const uint8_t port, const uint8_t pin,
 		}
 			break;
 	}
-
-	#ifdef CORE_M0
-	NVIC_SetPriority(pinInterruptIrqNs_[this->number_], interruptPriorities_[this->number_]);
-	#endif
-	#ifdef CORE_M4
-	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(pinInterruptIrqNs_[this->number_],
-			NVIC_EncodePriority(prioritygroup, interruptPriorities_[this->number_], 0));
-	#endif
+	IrqController::getIrqController()->setPriority(pinInterruptIrqNs_[this->number_],
+					interruptPriorities_[this->number_]);
 }
 
 
@@ -177,23 +171,24 @@ void PinInterrupt::deleteCallback(void)
 void PinInterrupt::enableInterrupt(void)
 {
 	Chip_PININT_ClearIntStatus(LPC_GPIO_PIN_INT, PININTCH(this->number_));
-	NVIC_ClearPendingIRQ(pinInterruptIrqNs_[this->number_]);
-	NVIC_EnableIRQ(pinInterruptIrqNs_[this->number_]);
+	IrqController::getIrqController()->
+			enableInterrupt(pinInterruptIrqNs_[this->number_]);
 }
 
 
 
 void PinInterrupt::disableInterrupt(void)
 {
-	NVIC_DisableIRQ(this->pinInterruptIrqNs_[this->number_]);
+	IrqController::getIrqController()->
+			disableInterrupt(pinInterruptIrqNs_[this->number_]);
 }
 
 
 
 void PinInterrupt::deinitialize(void)
 {
-	NVIC_DisableIRQ(pinInterruptIrqNs_[this->number_]);
-	NVIC_ClearPendingIRQ(pinInterruptIrqNs_[this->number_]);
+	IrqController::getIrqController()->
+			disableInterrupt(pinInterruptIrqNs_[this->number_]);
 	Chip_PININT_DisableIntLow(LPC_GPIO_PIN_INT, PININTCH(this->number_));
 	Chip_PININT_DisableIntHigh(LPC_GPIO_PIN_INT, PININTCH(this->number_));
 	Chip_PININT_ClearIntStatus(LPC_GPIO_PIN_INT, PININTCH(this->number_));
@@ -202,7 +197,7 @@ void PinInterrupt::deinitialize(void)
 
 
 
-void PinInterrupt::irqHandler(int8_t irqNumber)
+void PinInterrupt::irqHandler(int irqNumber)
 {
 	Chip_PININT_ClearIntStatus(LPC_GPIO_PIN_INT, PININTCH(this->number_));
 	if(this->callback_ != (IVoidCallback*)NULL)

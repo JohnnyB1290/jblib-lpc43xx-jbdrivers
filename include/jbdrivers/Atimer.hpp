@@ -49,7 +49,7 @@ public:
 
 private:
 	Atimer(void);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 
 	static Atimer* atimer_;
 	IVoidCallback* callback_ = NULL;

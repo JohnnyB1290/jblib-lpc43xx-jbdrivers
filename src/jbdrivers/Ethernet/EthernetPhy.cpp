@@ -68,14 +68,13 @@ EthernetPhy::EthernetPhy(void) : IVoidEthernet(), IIrqListener()
 	EthernetPhy::mac_[5] = (std::rand())&0xff;
 
 #ifndef CORE_M0SUB
-	this->setCode((uint64_t)1<<ETHERNET_IRQn);
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+	IrqController::getIrqController()->addIrqListener(this, ETHERNET_IRQn);
 #endif
 }
 
 
 
-void EthernetPhy::irqHandler(int8_t irqNumber)
+void EthernetPhy::irqHandler(int irqNumber)
 {
 	if(LPC_ETHERNET->DMA_STAT & DMA_ST_AIE)
 		this->errorHandler();
@@ -430,19 +429,12 @@ void EthernetPhy::initialize(void)
 	LPC_ETHERNET->DMA_INT_EN = DMA_IE_TIE | DMA_IE_TSE | DMA_IE_TJE | DMA_IE_OVE | DMA_IE_UNE |
 			DMA_IE_RUE | DMA_IE_RSE | DMA_IE_RWE | DMA_IE_ETE | DMA_IE_FBE | DMA_IE_AIE | DMA_IE_NIE;
 
-	#ifdef CORE_M4
-	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(ETHERNET_IRQn, NVIC_EncodePriority(prioritygroup, ETHERNET_PHY_INTERRUPT_PRIORITY, 0));
-	#endif
-
+    IrqController::getIrqController()->
+    		setPriority(ETHERNET_IRQn, ETHERNET_PHY_INTERRUPT_PRIORITY);
 	#ifndef CORE_M0SUB
-	#ifdef CORE_M0
-	NVIC_SetPriority(ETHERNET_IRQn, ETHERNET_PHY_INTERRUPT_PRIORITY);
-	#endif
-	NVIC_ClearPendingIRQ(ETHERNET_IRQn);
-	NVIC_EnableIRQ(ETHERNET_IRQn);
-	#endif
-	
+    IrqController::getIrqController()->enableInterrupt(ETHERNET_IRQn);
+    #endif
+
 	this->isInitialized_ = true;
 	#if (USE_CONSOLE && ETHERNET_PHY_USE_CONSOLE)
 	printf("Ethernet PHY Initialization Done!\n\r");
@@ -464,8 +456,7 @@ void EthernetPhy::start(void)
 void EthernetPhy::reset(void)
 {
 	#ifndef CORE_M0SUB
-	NVIC_ClearPendingIRQ(ETHERNET_IRQn);
-	NVIC_DisableIRQ(ETHERNET_IRQn);
+	IrqController::getIrqController()->disableInterrupt(ETHERNET_IRQn);
 	#endif
 	this->isInitialized_ = false;
 	#if (USE_CONSOLE && ETHERNET_PHY_USE_CONSOLE)

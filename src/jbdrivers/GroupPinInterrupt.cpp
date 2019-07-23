@@ -76,8 +76,8 @@ GroupPinInterrupt* GroupPinInterrupt::getGroupPinInterrupt(uint8_t groupNumber)
 GroupPinInterrupt::GroupPinInterrupt(uint8_t groupNumber) : IIrqListener()
 {
 	this->groupNumber_ = groupNumber;
-	this->setCode((uint64_t)1 << (groupPinInterruptIrqNs_[this->groupNumber_]));
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+	IrqController::getIrqController()->addIrqListener(this,
+			groupPinInterruptIrqNs_[this->groupNumber_]);
 }
 
 
@@ -92,16 +92,9 @@ void GroupPinInterrupt::initialize(uint8_t mode)
 		Chip_GPIOGP_SelectEdgeMode(LPC_GPIOGROUP, this->groupNumber_);
 	else
 		Chip_GPIOGP_SelectLevelMode(LPC_GPIOGROUP, this->groupNumber_);
-
-#ifdef CORE_M4
-	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(groupPinInterruptIrqNs_[this->groupNumber_],
-			NVIC_EncodePriority(prioritygroup, interruptPriorities_[this->groupNumber_], 0));
-#endif
-#ifdef CORE_M0
-	NVIC_SetPriority(groupPinInterruptIrqNs_[this->groupNumber_],
-			GroupPinInterrupt::interruptPriorities_[this->groupNumber_]);
-#endif
+	IrqController::getIrqController()->
+			setPriority(groupPinInterruptIrqNs_[this->groupNumber_],
+					interruptPriorities_[this->groupNumber_]);
 }
 
 
@@ -134,7 +127,7 @@ void GroupPinInterrupt::deleteGpio(uint8_t gpioPort, uint8_t gpioPin)
 
 
 
-void GroupPinInterrupt::irqHandler(int8_t irqNumber)
+void GroupPinInterrupt::irqHandler(int irqNumber)
 {
 	Chip_GPIOGP_ClearIntStatus(LPC_GPIOGROUP, this->groupNumber_);
 	if(this->callback_)
@@ -160,23 +153,24 @@ void GroupPinInterrupt::clearCallback(void)
 void GroupPinInterrupt::enableInterrupt(void)
 {
 	Chip_GPIOGP_ClearIntStatus(LPC_GPIOGROUP, this->groupNumber_);
-	NVIC_ClearPendingIRQ(groupPinInterruptIrqNs_[this->groupNumber_]);
-	NVIC_EnableIRQ(groupPinInterruptIrqNs_[this->groupNumber_]);
+	IrqController::getIrqController()->
+			enableInterrupt(groupPinInterruptIrqNs_[this->groupNumber_]);
 }
 
 
 
 void GroupPinInterrupt::disableInterrupt(void)
 {
-	NVIC_DisableIRQ(groupPinInterruptIrqNs_[this->groupNumber_]);
+	IrqController::getIrqController()->
+			disableInterrupt(groupPinInterruptIrqNs_[this->groupNumber_]);
 }
 
 
 
 void GroupPinInterrupt::deinitialize(void)
 {
-	NVIC_DisableIRQ(groupPinInterruptIrqNs_[this->groupNumber_]);
-	NVIC_ClearPendingIRQ(groupPinInterruptIrqNs_[this->groupNumber_]);
+	IrqController::getIrqController()->
+			disableInterrupt(groupPinInterruptIrqNs_[this->groupNumber_]);
 	Chip_GPIOGP_ClearIntStatus(LPC_GPIOGROUP, this->groupNumber_);
 	this->callback_ = (IVoidCallback*)NULL;
 }

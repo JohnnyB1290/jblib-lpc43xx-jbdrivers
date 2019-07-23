@@ -49,13 +49,13 @@ RiVoidTimer* RiVoidTimer::getRiVoidTimer(void)
 
 RiVoidTimer::RiVoidTimer(void) : IVoidTimer(), IIrqListener()
 {
-	this->setCode((uint64_t)1 << RITIMER_IRQn);
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+	IrqController::getIrqController()->
+			addIrqListener(this, RITIMER_IRQn);
 }
 
 
 
-void RiVoidTimer::irqHandler(int8_t irqNumber)
+void RiVoidTimer::irqHandler(int irqNumber)
 {
 	if(this->callback_)
 		this->callback_->voidCallback((void*)this, NULL);
@@ -75,18 +75,9 @@ void RiVoidTimer::initialize(uint32_t us)
 	Chip_RIT_SetCOMPVAL(LPC_RITIMER, cmpValue);
 
 	Chip_RIT_EnableCTRL(LPC_RITIMER, RIT_CTRL_ENCLR);
-
-	#ifdef CORE_M4
-	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(RITIMER_IRQn,
-			NVIC_EncodePriority(prioritygroup, RI_TIMER_INTERRUPT_PRIORITY, 0));
-	#endif
-	#ifdef CORE_M0
-	NVIC_SetPriority(RITIMER_IRQn, RI_TIMER_INTERRUPT_PRIORITY);
-	#endif
-
-	NVIC_ClearPendingIRQ(RITIMER_IRQn);
-	NVIC_EnableIRQ(RITIMER_IRQn);
+	IrqController::getIrqController()->
+			setPriority(RITIMER_IRQn, RI_TIMER_INTERRUPT_PRIORITY);
+	IrqController::getIrqController()->enableInterrupt(RITIMER_IRQn);
 }
 
 
@@ -156,9 +147,9 @@ void RiVoidTimer::deleteCallback(void)
 
 void RiVoidTimer::deinitialize(void)
 {
-	IrqController::getIrqController()->deletePeripheralIrqListener(this);
 	this->stop();
-	NVIC_DisableIRQ(RITIMER_IRQn);
+	IrqController::getIrqController()->
+			disableInterrupt(RITIMER_IRQn);
 	Chip_RGU_TriggerReset(RGU_RITIMER_RST);
 	while (Chip_RGU_InReset(RGU_RITIMER_RST)) {}
 	Chip_RIT_DeInit(LPC_RITIMER);

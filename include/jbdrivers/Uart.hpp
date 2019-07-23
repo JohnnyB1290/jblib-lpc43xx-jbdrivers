@@ -58,7 +58,7 @@ private:
 	Uart(uint8_t number, uint32_t baudrate, BoardGpio_t* trEnableGpio);
 	void constructor(uint8_t number, uint32_t baudrate);
 	virtual ~Uart(void);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 
 	static Uart* uarts_[UARTS_NUM];
 	static LPC_USART_T* lpcUarts_[UARTS_NUM];

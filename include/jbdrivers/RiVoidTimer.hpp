@@ -52,7 +52,7 @@ public:
 
 private:
 	RiVoidTimer(void);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 
 	static RiVoidTimer* riVoidTimer_;
 	IVoidCallback* callback_ = NULL;

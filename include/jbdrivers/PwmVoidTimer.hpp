@@ -56,7 +56,7 @@ public:
 
 private:
 	PwmVoidTimer(uint8_t number);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 
 	static PwmVoidTimer* pwmVoidTimers_[PWM_TIMERS_NUM];
 	uint8_t number_ = 0;

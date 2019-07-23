@@ -69,7 +69,7 @@ public:
 
 private:
 	GroupPinInterrupt(uint8_t groupNumber);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 
 	static GroupPinInterrupt* groupPinInterrupts_[GROUP_PIN_INTERRUPT_NUM_GROUPS];
 	static const IRQn_Type groupPinInterruptIrqNs_[];

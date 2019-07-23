@@ -52,7 +52,7 @@ public:
 
 private:
 	SysTickVoidTimer(void);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 
 	static SysTickVoidTimer* sysTickVoidTimer_;
 	IVoidCallback* callback_ = NULL;

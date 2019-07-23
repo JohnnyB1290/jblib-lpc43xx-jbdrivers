@@ -64,7 +64,7 @@ public:
 
 private:
 	GptRtTimer(uint8_t timerNumber);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 
 	static const CHIP_RGU_RST_T resetNumbers_[GPT_TIMERS_NUM];
 	static const CHIP_CCU_CLK_T clockNumbers_[GPT_TIMERS_NUM];

@@ -53,7 +53,7 @@ public:
 
 private:
 	UsbDeviceRomController(uint8_t usbNumber);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 	static ErrorCode_t resetEvent(USBD_HANDLE_T handle);
 
 	static uint8_t deviceDescriptorUsb0_[];

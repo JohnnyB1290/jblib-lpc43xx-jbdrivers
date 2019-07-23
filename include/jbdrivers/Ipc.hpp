@@ -56,7 +56,7 @@ public:
 
 private:
 	Ipc(uint8_t gate);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 	void (*clearTxEvent_)(void) = NULL;
 
 	static Ipc* ipcs_[3];

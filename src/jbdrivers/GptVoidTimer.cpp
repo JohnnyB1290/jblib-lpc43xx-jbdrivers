@@ -135,13 +135,13 @@ GptVoidTimer* GptVoidTimer::getGptVoidTimer(uint8_t timerNumber)
 GptVoidTimer::GptVoidTimer(uint8_t timerNumber) : IVoidTimer(), IIrqListener()
 {
 	this->timerNumber_ = timerNumber;
-	this->setCode((uint64_t)1 << (irqNumbers_[this->timerNumber_]));
-	IrqController::getIrqController()->addPeripheralIrqListener(this);
+	IrqController::getIrqController()->addIrqListener(this,
+			irqNumbers_[this->timerNumber_]);
 }
 
 
 
-void GptVoidTimer::irqHandler(int8_t irqNumber)
+void GptVoidTimer::irqHandler(int irqNumber)
 {
 	if (Chip_TIMER_MatchPending(lpcTimers_[this->timerNumber_], 0)) {
 		Chip_TIMER_ClearMatch(lpcTimers_[this->timerNumber_], 0);
@@ -158,22 +158,13 @@ void GptVoidTimer::initialize(uint32_t us)
 	Chip_RGU_TriggerReset(resetNumbers_[this->timerNumber_]);
 	while (Chip_RGU_InReset(resetNumbers_[this->timerNumber_])) {}
 	Chip_TIMER_Reset(lpcTimers_[this->timerNumber_]);
-
-	#ifdef CORE_M0
-	NVIC_SetPriority(irqNumbers_[this->timerNumber_], interruptPriorities_[this->timerNumber_]);
-	#endif
-	#ifdef CORE_M4
-	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(irqNumbers_[this->timerNumber_],
-			NVIC_EncodePriority(prioritygroup, interruptPriorities_[this->timerNumber_], 0));
-	#endif
 	uint32_t tics = (Chip_Clock_GetRate(clockNumbers_[this->timerNumber_]) / 1000000) * us;
 	Chip_TIMER_SetMatch(lpcTimers_[this->timerNumber_], 0, tics);
 	Chip_TIMER_ResetOnMatchEnable(lpcTimers_[this->timerNumber_], 0);
 	Chip_TIMER_MatchEnableInt(lpcTimers_[this->timerNumber_], 0);
-
-	NVIC_ClearPendingIRQ(irqNumbers_[this->timerNumber_]);
-	NVIC_EnableIRQ(irqNumbers_[this->timerNumber_]);
+	IrqController::getIrqController()->setPriority(irqNumbers_[this->timerNumber_],
+			interruptPriorities_[this->timerNumber_]);
+	IrqController::getIrqController()->enableInterrupt(irqNumbers_[this->timerNumber_]);
 }
 
 
@@ -230,7 +221,8 @@ void GptVoidTimer::deleteCallback(void)
 void GptVoidTimer::deinitialize(void)
 {
 	this->stop();
-	NVIC_DisableIRQ(irqNumbers_[this->timerNumber_]);
+	IrqController::getIrqController()->
+			disableInterrupt(irqNumbers_[this->timerNumber_]);
 	Chip_RGU_TriggerReset(resetNumbers_[this->timerNumber_]);
 	while (Chip_RGU_InReset(resetNumbers_[this->timerNumber_])) {}
 	Chip_TIMER_DeInit(lpcTimers_[this->timerNumber_]);

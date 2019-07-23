@@ -64,7 +64,7 @@ public:
 
 private:
 	PinInterrupt(uint8_t number);
-	virtual void irqHandler(int8_t irqNumber);
+	virtual void irqHandler(int irqNumber);
 
 	static const IRQn_Type pinInterruptIrqNs_[];
 	static const uint32_t interruptPriorities_[];

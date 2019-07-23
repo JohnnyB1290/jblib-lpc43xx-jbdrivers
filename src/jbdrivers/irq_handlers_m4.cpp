@@ -42,71 +42,71 @@ extern "C" {
 
 void NMI_Handler(void)
 {
-	irqController->handleCortexIrq(NonMaskableInt_IRQn);
+	irqController->handleIrq(NonMaskableInt_IRQn);
 	while(1);
 }
 
 void HardFault_Handler(void)
 {
-	irqController->handleCortexIrq(HardFault_IRQn);
+	irqController->handleIrq(HardFault_IRQn);
 	while(1);
 }
 
 void MemManage_Handler(void)
 {
-	irqController->handleCortexIrq(MemoryManagement_IRQn);
+	irqController->handleIrq(MemoryManagement_IRQn);
 	while(1);
 }
 
 void BusFault_Handler(void)
 {
-	irqController->handleCortexIrq(BusFault_IRQn);
+	irqController->handleIrq(BusFault_IRQn);
 	while(1);
 }
 
 void UsageFault_Handler(void)
 {
-	irqController->handleCortexIrq(UsageFault_IRQn);
+	irqController->handleIrq(UsageFault_IRQn);
 	while(1);
 }
 
 void SVC_Handler(void)
 {
-	irqController->handleCortexIrq(SVCall_IRQn);
+	irqController->handleIrq(SVCall_IRQn);
 	while(1);
 }
 
 void DebugMon_Handler(void)
 {
-	irqController->handleCortexIrq(DebugMonitor_IRQn);
+	irqController->handleIrq(DebugMonitor_IRQn);
 	while(1);
 }
 
 void PendSV_Handler(void)
 {
-	irqController->handleCortexIrq(PendSV_IRQn);
+	irqController->handleIrq(PendSV_IRQn);
 	while(1);
 }
 
 void SysTick_Handler(void)
 {
 
-	irqController->handleCortexIrq(SysTick_IRQn);
+	irqController->handleIrq(SysTick_IRQn);
 }
 
 void DAC_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(DAC_IRQn);
+	irqController->handleIrq(DAC_IRQn);
 }
 
 void M0APP_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(M0APP_IRQn);
+	irqController->handleIrq(M0APP_IRQn);
 }
 
 void DMA_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(DMA_IRQn);
+	irqController->handleIrq(DMA_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -114,7 +114,7 @@ void FLASH_EEPROM_IRQHandler(void){
 #else
 void FLASHEEPROM_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(RESERVED2_IRQn);
+	irqController->handleIrq(RESERVED2_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -122,32 +122,32 @@ void ETH_IRQHandler(void){
 #else
 void ETHERNET_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(ETHERNET_IRQn);
+	irqController->handleIrq(ETHERNET_IRQn);
 }
 
 void SDIO_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(SDIO_IRQn);
+	irqController->handleIrq(SDIO_IRQn);
 }
 
 void LCD_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(LCD_IRQn);
+	irqController->handleIrq(LCD_IRQn);
 }
 
 void USB0_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(USB0_IRQn);
+	irqController->handleIrq(USB0_IRQn);
 }
 
 void USB1_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(USB1_IRQn);
+	irqController->handleIrq(USB1_IRQn);
 }
 
 void SCT_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(SCT_IRQn);
+	irqController->handleIrq(SCT_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -155,67 +155,67 @@ void RIT_IRQHandler(void){
 #else
 void RITIMER_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(RITIMER_IRQn);
+	irqController->handleIrq(RITIMER_IRQn);
 }
 
 void TIMER0_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(TIMER0_IRQn);
+	irqController->handleIrq(TIMER0_IRQn);
 }
 
 void TIMER1_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(TIMER1_IRQn);
+	irqController->handleIrq(TIMER1_IRQn);
 }
 
 void TIMER2_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(TIMER2_IRQn);
+	irqController->handleIrq(TIMER2_IRQn);
 }
 
 void TIMER3_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(TIMER3_IRQn);
+	irqController->handleIrq(TIMER3_IRQn);
 }
 
 void MCPWM_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(MCPWM_IRQn);
+	irqController->handleIrq(MCPWM_IRQn);
 }
 
 void ADC0_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(ADC0_IRQn);
+	irqController->handleIrq(ADC0_IRQn);
 }
 
 void I2C0_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(I2C0_IRQn);
+	irqController->handleIrq(I2C0_IRQn);
 }
 
 void I2C1_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(I2C1_IRQn);
+	irqController->handleIrq(I2C1_IRQn);
 }
 
 void SPI_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(SPI_INT_IRQn);
+	irqController->handleIrq(SPI_INT_IRQn);
 }
 
 void ADC1_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(ADC1_IRQn);
+	irqController->handleIrq(ADC1_IRQn);
 }
 
 void SSP0_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(SSP0_IRQn);
+	irqController->handleIrq(SSP0_IRQn);
 }
 
 void SSP1_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(SSP1_IRQn);
+	irqController->handleIrq(SSP1_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -223,12 +223,12 @@ void UART0_IRQHandler(void){
 #else
 void USART0_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(USART0_IRQn);
+	irqController->handleIrq(USART0_IRQn);
 }
 
 void UART1_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(UART1_IRQn);
+	irqController->handleIrq(UART1_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -236,7 +236,7 @@ void UART2_IRQHandler(void){
 #else
 void USART2_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(USART2_IRQn);
+	irqController->handleIrq(USART2_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -244,27 +244,27 @@ void UART3_IRQHandler(void){
 #else
 void USART3_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(USART3_IRQn);
+	irqController->handleIrq(USART3_IRQn);
 }
 
 void I2S0_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(I2S0_IRQn);
+	irqController->handleIrq(I2S0_IRQn);
 }
 
 void I2S1_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(I2S1_IRQn);
+	irqController->handleIrq(I2S1_IRQn);
 }
 
 void SPIFI_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(RESERVED4_IRQn);
+	irqController->handleIrq(RESERVED4_IRQn);
 }
 
 void SGPIO_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(SGPIO_INT_IRQn);
+	irqController->handleIrq(SGPIO_INT_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -272,7 +272,7 @@ void GPIO0_IRQHandler(void){
 #else
 void PIN_INT0_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(PIN_INT0_IRQn);
+	irqController->handleIrq(PIN_INT0_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -280,7 +280,7 @@ void GPIO1_IRQHandler(void){
 #else
 void PIN_INT1_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(PIN_INT1_IRQn);
+	irqController->handleIrq(PIN_INT1_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -288,7 +288,7 @@ void GPIO2_IRQHandler(void){
 #else
 void PIN_INT2_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(PIN_INT2_IRQn);
+	irqController->handleIrq(PIN_INT2_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -296,7 +296,7 @@ void GPIO3_IRQHandler(void){
 #else
 void PIN_INT3_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(PIN_INT3_IRQn);
+	irqController->handleIrq(PIN_INT3_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -304,7 +304,7 @@ void GPIO4_IRQHandler(void){
 #else
 void PIN_INT4_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(PIN_INT4_IRQn);
+	irqController->handleIrq(PIN_INT4_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -312,7 +312,7 @@ void GPIO5_IRQHandler(void){
 #else
 void PIN_INT5_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(PIN_INT5_IRQn);
+	irqController->handleIrq(PIN_INT5_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -320,22 +320,22 @@ void GPIO6_IRQHandler(void){
 #else
 void PIN_INT6_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(PIN_INT6_IRQn);
+	irqController->handleIrq(PIN_INT6_IRQn);
 }
 
 void PIN_INT7_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(PIN_INT7_IRQn);
+	irqController->handleIrq(PIN_INT7_IRQn);
 }
 
 void GINT0_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(GINT0_IRQn);
+	irqController->handleIrq(GINT0_IRQn);
 }
 
 void GINT1_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(GINT1_IRQn);
+	irqController->handleIrq(GINT1_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -343,7 +343,7 @@ void EVRT_IRQHandler(void){
 #else
 void EVENTROUTER_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(EVENTROUTER_IRQn);
+	irqController->handleIrq(EVENTROUTER_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -351,22 +351,22 @@ void CAN1_IRQHandler(void){
 #else
 void C_CAN1_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(C_CAN1_IRQn);
+	irqController->handleIrq(C_CAN1_IRQn);
 }
 
 void ADCHS_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(ADCHS_IRQn);
+	irqController->handleIrq(ADCHS_IRQn);
 }
 
 void ATIMER_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(ATIMER_IRQn);
+	irqController->handleIrq(ATIMER_IRQn);
 }
 
 void RTC_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(RTC_IRQn);
+	irqController->handleIrq(RTC_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -374,12 +374,12 @@ void WDT_IRQHandler(void){
 #else
 void WWDT_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(WWDT_IRQn);
+	irqController->handleIrq(WWDT_IRQn);
 }
 
 void M0SUB_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(M0SUB_IRQn);
+	irqController->handleIrq(M0SUB_IRQn);
 }
 
 #ifdef __CODE_RED
@@ -387,12 +387,12 @@ void CAN0_IRQHandler(void){
 #else
 void C_CAN0_IRQHandler(void){
 #endif
-	irqController->handlePeripheralIrq(C_CAN0_IRQn);
+	irqController->handleIrq(C_CAN0_IRQn);
 }
 
 void QEI_IRQHandler(void)
 {
-	irqController->handlePeripheralIrq(QEI_IRQn);
+	irqController->handleIrq(QEI_IRQn);
 }
 
 #ifdef __cplusplus

@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include "jbkernel/jb_common.h"
 #include "jbkernel/callback_interfaces.hpp"
+#include "jbutilities/LinkedList.hpp"
 
 namespace jblib::jbdrivers
 {
@@ -36,41 +37,38 @@ namespace jblib::jbdrivers
 class IIrqListener
 {
 public:
-	IIrqListener(void){ }
-    virtual ~IIrqListener(void){ }
-    uint64_t getCode(void) const
-    {
-    	return this->code_;
-    }
-    void setCode(uint64_t code)
-    {
-    	this->code_ = code;
-    }
-    virtual void irqHandler(int8_t irqNumber) = 0;
-
-private:
-    uint64_t code_ = 0;
+	IIrqListener(void){}
+	virtual ~IIrqListener(void){}
+	virtual void irqHandler(int irqNumber) = 0;
 };
+
+
+using namespace jbutilities;
 
 class IrqController
 {
 public:
 	static IrqController* getIrqController(void);
-    void addCortexIrqListener(IIrqListener* const listener);
-    void addPeripheralIrqListener(IIrqListener* const listener);
-    void deleteCortexIrqListener(IIrqListener* const listener);
-    void deletePeripheralIrqListener(IIrqListener* const listener);
-	void handleCortexIrq(const int8_t irqNumber);
-	void handlePeripheralIrq(const int8_t irqNumber);
+	void enableInterrupt(int irqNumber);
+	void disableInterrupt(int irqNumber);
+	void setPriority(int irqNumber, uint32_t priority);
+    void addIrqListener(IIrqListener* const listener, int irqNumber);
+    void deleteIrqListener(IIrqListener* const listener);
+	void handleIrq(const int irqNumber);
 
 private:
 	IrqController(void);
 
 	static IrqController* irqController_;
-    IIrqListener* cortexIrqListeners_[IRQ_CONTROLLER_NUM_CORTEX_LISTENERS];
-    IIrqListener* peripheralIrqListeners_[IRQ_CONTROLLER_NUM_PERIPHERAL_LISTENERS];
+	typedef struct
+	{
+		IIrqListener* listener = NULL;
+		int irqNumber = 0;
+	}ListenersListItem;
+	LinkedList<ListenersListItem>* listenersList_ = NULL;
 };
 
 }
+
 
 #endif /* IRQCONTROLLER_HPP_ */
