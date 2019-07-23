@@ -73,7 +73,7 @@ void IrqController::setPriority(int irqNumber, uint32_t priority)
 {
 	#ifdef CORE_M4
 	uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-	NVIC_SetPriority(irqNumber,
+	NVIC_SetPriority((IRQn_Type)irqNumber,
 			NVIC_EncodePriority(prioritygroup, priority, 0));
 	#endif
 	#ifdef CORE_M0
