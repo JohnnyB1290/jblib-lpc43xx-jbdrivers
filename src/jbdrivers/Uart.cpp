@@ -129,7 +129,7 @@ void Uart::initialize(void* (* const mallocFunc)(size_t),
 		Chip_SCU_PinMuxSet(Uart::txPorts_[this->number_], Uart::txPins_[this->number_],
 				(SCU_MODE_INACT | Uart::txScuModes_[this->number_]));
 		Chip_SCU_PinMuxSet(Uart::rxPorts_[this->number_], Uart::rxPins_[this->number_],
-				(SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS |
+				(SCU_MODE_PULLDOWN | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS |
 						Uart::rxScuModes_[this->number_]));
 
 		Chip_UART_Init(Uart::lpcUarts_[this->number_]);
