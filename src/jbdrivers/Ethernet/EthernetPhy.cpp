@@ -429,10 +429,10 @@ void EthernetPhy::initialize(void)
 	LPC_ETHERNET->DMA_INT_EN = DMA_IE_TIE | DMA_IE_TSE | DMA_IE_TJE | DMA_IE_OVE | DMA_IE_UNE |
 			DMA_IE_RUE | DMA_IE_RSE | DMA_IE_RWE | DMA_IE_ETE | DMA_IE_FBE | DMA_IE_AIE | DMA_IE_NIE;
 
-    IrqController::getIrqController()->
-    		setPriority(ETHERNET_IRQn, ETHERNET_PHY_INTERRUPT_PRIORITY);
-	#ifndef CORE_M0SUB
-    IrqController::getIrqController()->enableInterrupt(ETHERNET_IRQn);
+    #ifndef CORE_M0SUB
+	IrqController::getIrqController()->
+	    		setPriority(ETHERNET_IRQn, ETHERNET_PHY_INTERRUPT_PRIORITY);
+	IrqController::getIrqController()->enableInterrupt(ETHERNET_IRQn);
     #endif
 
 	this->isInitialized_ = true;
