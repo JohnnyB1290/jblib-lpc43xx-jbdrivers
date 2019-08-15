@@ -36,7 +36,7 @@ BoardGpio_t JbController::boardGpios_[] = JBCONTROLLER_BOARD_GPIOS;
 bool JbController::isInitialized = false;
 IVoidCallback* JbController::mainProcedures_[JBCONTROLLER_NUM_MAIN_PROCEDURES];
 void* JbController::mainProceduresParameters_[JBCONTROLLER_NUM_MAIN_PROCEDURES];
-
+uint32_t JbController::heapRecursiveSize = 0;
 
 
 void JbController::initialize(void)
@@ -181,6 +181,24 @@ uint32_t JbController::getHeapFree(void)
     }
     enableInterrupts();
     return ret;
+}
+
+uint32_t JbController::getHeapFreeRecursive(bool resetCounter) {
+	if(resetCounter) {
+		JbController::heapRecursiveSize = 0;
+		__disable_irq();
+	}
+	uint32_t step = 100;
+	void* ptr = malloc(step);
+	if(ptr) {
+		JbController::heapRecursiveSize += step;
+		JbController::getHeapFreeRecursive(false);
+		free(ptr);
+	}
+	if(resetCounter) {
+		__enable_irq();
+	}
+	return JbController::heapRecursiveSize;
 }
 
 }

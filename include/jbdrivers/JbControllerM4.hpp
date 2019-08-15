@@ -61,6 +61,7 @@ public:
 	static void softReset(void);
 	static void goToApp(uint32_t applicationAddress);
 	static uint32_t getHeapFree(void);
+	static uint32_t getHeapFreeRecursive(bool resetCounter);
 #if USE_CONSOLE
 	static Console* getConsole(void)
 	{
@@ -72,6 +73,7 @@ protected:
 	static BoardGpio_t boardGpios_[];
 
 private:
+	static uint32_t heapRecursiveSize;
 	static bool isInitialized;
 	static IVoidCallback* mainProcedures_[JBCONTROLLER_NUM_MAIN_PROCEDURES];
 	static void* mainProceduresParameters_[JBCONTROLLER_NUM_MAIN_PROCEDURES];
