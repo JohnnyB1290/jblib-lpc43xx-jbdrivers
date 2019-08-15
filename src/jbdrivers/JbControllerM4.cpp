@@ -349,7 +349,7 @@ uint32_t JbController::getHeapFree(void)
 uint32_t JbController::getHeapFreeRecursive(bool resetCounter) {
 	if(resetCounter) {
 		JbController::heapRecursiveSize = 0;
-		__disable_irq();
+		disableInterrupts();
 	}
 	uint32_t step = 100;
 	void* ptr = malloc(step);
@@ -359,7 +359,7 @@ uint32_t JbController::getHeapFreeRecursive(bool resetCounter) {
 		free(ptr);
 	}
 	if(resetCounter) {
-		__enable_irq();
+		enableInterrupts();
 	}
 	return JbController::heapRecursiveSize;
 }
