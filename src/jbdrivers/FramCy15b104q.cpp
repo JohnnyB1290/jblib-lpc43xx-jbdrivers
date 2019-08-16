@@ -149,50 +149,24 @@ bool FramCy15b104q::exchangeData(uint8_t opCode, uint32_t address,
 		case WRITE_OPCODE:
 		case RDID_OPCODE:
 		{
-			uint32_t finalLength = length;
-			if(opCode != RDID_OPCODE)
-				finalLength += 4;
-			else{
-				if(length != DEVICE_ID_SIZE)
-					return false;
-				finalLength = DEVICE_ID_SIZE + 1;
-			}
-
-			uint8_t* txArr = (uint8_t*) malloc_s(finalLength);
-			if (txArr == (uint8_t*)NULL)
-				return false;
-
-			uint32_t dataShift = 0;
-			txArr[0] = opCode;
-			dataShift++;
-			if(opCode != RDID_OPCODE){
-				txArr[1] = (address >> 16) & 0xff;
-				txArr[2] = (address >> 8) & 0xff;
-				txArr[3] = address & 0xff;
-				dataShift += 3;
-			}
-
-			if(txData)
-				std::memcpy(&txArr[dataShift], txData, length);
-
-
-			uint8_t* rxArr = (uint8_t*)NULL;
-			if (rxData) {
-				rxArr = (uint8_t*) malloc_s(finalLength);
-				if (rxArr == (uint8_t*) NULL) {
-					free_s(txArr);
+			uint32_t headerLength = 4;
+			uint8_t header[4];
+			if(opCode == RDID_OPCODE) {
+				if(length != DEVICE_ID_SIZE) {
 					return false;
 				}
+				headerLength = 1;
 			}
-
-			this->ssp_->txRxFrame(txArr, rxArr, finalLength, this->sspDeviceNumber_);
-
-			if (rxData)
-				std::memcpy(rxData, &rxArr[dataShift], length);
-
-			free_s(txArr);
-			if (rxArr)
-				free_s(rxArr);
+			header[0] = opCode;
+			if(opCode != RDID_OPCODE){
+				header[1] = (address >> 16) & 0xff;
+				header[2] = (address >> 8) & 0xff;
+				header[3] = address & 0xff;
+			}
+			void* txFrames[] = {(void*)header, (void*)txData};
+			void* rxFrames[] = {(void*)NULL, (void*)rxData};
+			uint32_t lengthArray[] = {headerLength, length};
+			this->ssp_->txRxFrames(2, txFrames, rxFrames, lengthArray, this->sspDeviceNumber_);
 		}
 		break;
 
