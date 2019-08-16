@@ -57,8 +57,9 @@ public:
 	uint16_t txRxFrame(uint16_t data);
 	uint16_t txRxFrame(uint16_t data, uint32_t deviceNumber);
 	uint32_t txRxFrame(void* txData, void* rxData, uint32_t length);
-	uint32_t txRxFrame(void* txData, void* rxData,
-			uint32_t length, uint32_t deviceNumber);
+	uint32_t txRxFrame(void* txData, void* rxData, uint32_t length, uint32_t deviceNumber);
+	void txRxFrames(uint32_t framesCount, void** txDataPointers, void** rxDataPointers, uint32_t* lengthArray, uint32_t deviceNumber);
+
 	void deinitilize(void);
 
 private:

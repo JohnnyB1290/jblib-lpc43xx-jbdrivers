@@ -138,8 +138,8 @@ void Ssp::initilize(uint32_t bitrate,
 		#endif
 		Chip_SCU_PinMuxSet(SSP_0_MOSI_PORT, SSP_0_MOSI_PIN,
 				(SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS | SSP_0_MOSI_SCU_MODE)); /*  MOSI */
-		Chip_SCU_PinMuxSet(SSP_0_MOSI_PORT, SSP_0_MOSI_PIN,
-				(SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS | SSP_0_MOSI_SCU_MODE)); /* MISO */
+		Chip_SCU_PinMuxSet(SSP_0_MISO_PORT, SSP_0_MISO_PIN,
+				(SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS | SSP_0_MISO_SCU_MODE)); /* MISO */
 		Chip_SSP_Init(this->lpcSsps_[this->number_]);
 		Chip_SSP_SetFormat(this->lpcSsps_[this->number_], SSP_0_BITS_PER_FRAME,
 				SSP_0_FRAMEFORMAT, SSP_0_CLOCKMODE);
@@ -153,8 +153,8 @@ void Ssp::initilize(uint32_t bitrate,
 		#endif
 		Chip_SCU_PinMuxSet(SSP_1_MOSI_PORT, SSP_1_MOSI_PIN,
 				(SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS | SSP_1_MOSI_SCU_MODE)); /*  MOSI */
-		Chip_SCU_PinMuxSet(SSP_1_MOSI_PORT, SSP_1_MOSI_PIN,
-				(SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS | SSP_1_MOSI_SCU_MODE)); /* MISO */
+		Chip_SCU_PinMuxSet(SSP_1_MISO_PORT, SSP_1_MISO_PIN,
+				(SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS | SSP_1_MISO_SCU_MODE)); /* MISO */
 		Chip_SSP_Init(this->lpcSsps_[this->number_]);
 		Chip_SSP_SetFormat(this->lpcSsps_[this->number_], SSP_1_BITS_PER_FRAME,
 				SSP_1_FRAMEFORMAT, SSP_1_CLOCKMODE);
@@ -219,8 +219,7 @@ uint32_t Ssp::txRxFrame(void* txData, void* rxData, uint32_t length)
 
 
 
-uint32_t Ssp::txRxFrame(void* txData, void* rxData,
-		uint32_t length, uint32_t deviceNumber)
+uint32_t Ssp::txRxFrame(void* txData, void* rxData, uint32_t length, uint32_t deviceNumber)
 {
 	Chip_SSP_DATA_SETUP_T dataSetup;
 	uint32_t ret = 0;
@@ -243,6 +242,24 @@ uint32_t Ssp::txRxFrame(void* txData, void* rxData,
 	else
 		ret = Chip_SSP_RWFrames_Blocking(this->lpcSsps_[this->number_], &dataSetup);
 	return ret;
+}
+
+void Ssp::txRxFrames(uint32_t framesCount, void** txDataPointers, void** rxDataPointers, uint32_t* lengthArray, uint32_t deviceNumber) {
+	if((this->sSelGpios_ != NULL) && (deviceNumber < this->sSelSize_)){
+		Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT,
+				this->sSelGpios_[deviceNumber].gpioPort,
+				this->sSelGpios_[deviceNumber].gpioPin);
+	}
+	uint32_t i = 0;
+	while(i < framesCount) {
+		this->txRxFrame(txDataPointers[i], rxDataPointers[i], lengthArray[i], this->sSelSize_ + 1);
+		i++;
+	}
+	if((this->sSelGpios_ != NULL) && (deviceNumber < this->sSelSize_)){
+		Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT,
+				this->sSelGpios_[deviceNumber].gpioPort,
+				this->sSelGpios_[deviceNumber].gpioPin);
+	}
 }
 
 
