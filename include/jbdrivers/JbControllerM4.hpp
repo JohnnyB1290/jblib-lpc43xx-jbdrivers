@@ -26,31 +26,19 @@
 #ifndef JBCONTROLLERM4_HPP_
 #define JBCONTROLLERM4_HPP_
 
-#include <stdint.h>
 #include "jbkernel/jb_common.h"
-#include "jbkernel/callback_interfaces.hpp"
+#include "jbkernel/JbKernel.hpp"
 
-#if USE_CONSOLE
-#include <stdio.h>
-#include "jbkernel/Console.hpp"
-#endif
 
 namespace jblib::jbdrivers
 {
 
 using namespace jbkernel;
 
-class JbController
+class JbController : public JbKernel
 {
 public:
 	static void initialize(void);
-	static void doMain(void);
-	static void addMainProcedure(IVoidCallback* callback);
-	static void addMainProcedure(IVoidCallback* callback, void* parameter);
-	static void deleteMainProcedure(IVoidCallback* callback);
-	static void deleteMainProcedure(IVoidCallback* callback, void* parameter);
-	static void delayMs(uint32_t ms);
-	static void delayUs(uint32_t us);
 	static void gpioOn(uint8_t number);
 	static void gpioOff(uint8_t number);
 	static void gpioTgl(uint8_t number);
@@ -60,23 +48,9 @@ public:
 	static void resetPeriphery(void);
 	static void softReset(void);
 	static void goToApp(uint32_t applicationAddress);
-	static uint32_t getHeapFree(void);
-	static uint32_t getHeapFreeRecursive(bool resetCounter);
-#if USE_CONSOLE
-	static Console* getConsole(void)
-	{
-		return Console::getConsole();
-	}
-#endif
 
 protected:
 	static BoardGpio_t boardGpios_[];
-
-private:
-	static uint32_t heapRecursiveSize;
-	static bool isInitialized;
-	static IVoidCallback* mainProcedures_[JBCONTROLLER_NUM_MAIN_PROCEDURES];
-	static void* mainProceduresParameters_[JBCONTROLLER_NUM_MAIN_PROCEDURES];
 };
 
 }

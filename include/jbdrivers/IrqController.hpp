@@ -27,9 +27,11 @@
 #define IRQCONTROLLER_HPP_
 
 #include <stdint.h>
+#include <forward_list>
 #include "jbkernel/jb_common.h"
 #include "jbkernel/callback_interfaces.hpp"
-#include "jbutilities/LinkedList.hpp"
+
+
 
 namespace jblib::jbdrivers
 {
@@ -43,7 +45,6 @@ public:
 };
 
 
-using namespace jbutilities;
 
 class IrqController
 {
@@ -65,7 +66,7 @@ private:
 		IIrqListener* listener = NULL;
 		int irqNumber = 0;
 	}ListenersListItem;
-	LinkedList<ListenersListItem>* listenersList_ = NULL;
+	std::forward_list<ListenersListItem> listenersList_;
 };
 
 }

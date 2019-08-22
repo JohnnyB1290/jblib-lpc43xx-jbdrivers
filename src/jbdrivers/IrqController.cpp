@@ -32,8 +32,6 @@
 namespace jblib::jbdrivers
 {
 
-using namespace jbutilities;
-
 IrqController* IrqController::irqController_ = NULL;
 
 
@@ -48,7 +46,7 @@ IrqController* IrqController::getIrqController(void)
 
 IrqController::IrqController(void)
 {
-	this->listenersList_ = new LinkedList<ListenersListItem>();
+
 }
 
 
@@ -85,47 +83,32 @@ void IrqController::setPriority(int irqNumber, uint32_t priority)
 
 void IrqController::addIrqListener(IIrqListener* const listener, int irqNumber)
 {
-	ListenersListItem* newItem = new ListenersListItem();
-	newItem->listener = listener;
-	newItem->irqNumber = irqNumber;
-	this->listenersList_->insertLast(newItem);
+	ListenersListItem newItem;
+	newItem.listener = listener;
+	newItem.irqNumber = irqNumber;
+	this->listenersList_.push_front(newItem);
 }
 
 
 
 void IrqController::deleteIrqListener(IIrqListener* const listener)
 {
-	if(!this->listenersList_->isEmpty()){
-		LinkedList<ListenersListItem>::LinkIterator* iterator =
-				this->listenersList_->getIterator();
-		iterator->reset();
-		while(1){
-			if(iterator->getCurrent()->listener == listener)
-				free_s(iterator->deleteCurrent());
-			if(!iterator->atEnd())
-				iterator->nextLink();
-			else
-				break;
-		}
-	}
+	this->listenersList_.remove_if([listener](ListenersListItem item){
+		if(listener == item.listener)
+			return true;
+		else
+			 return false;
+	});
 }
 
 
 
 void IrqController::handleIrq(const int irqNumber)
 {
-	if(!this->listenersList_->isEmpty()){
-		LinkedList<ListenersListItem>::LinkIterator* iterator =
-				this->listenersList_->getIterator();
-		iterator->reset();
-		while(1){
-			if(iterator->getCurrent()->irqNumber == irqNumber)
-				iterator->getCurrent()->listener->irqHandler(irqNumber);
-			if(!iterator->atEnd())
-				iterator->nextLink();
-			else
-				break;
-		}
+	for(std::forward_list<ListenersListItem>::iterator it = this->listenersList_.begin();
+			it != this->listenersList_.end(); it++){
+		if(it->irqNumber == irqNumber)
+			it->listener->irqHandler(irqNumber);
 	}
 }
 
