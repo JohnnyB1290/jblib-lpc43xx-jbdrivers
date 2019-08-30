@@ -30,6 +30,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "jbdrivers/Spifi.hpp"
+#include "jbdrivers/JbController.hpp"
 #if (USE_CONSOLE && SPIFI_USE_CONSOLE)
 #include <stdio.h>
 #endif
@@ -63,8 +64,13 @@ Spifi* Spifi::getSpifi(void)
 
 
 
-Spifi::Spifi(void)
+Spifi::Spifi(void) : IVoidMemory(SPIFLASH_BASE_ADDRESS)
 {
+#if USE_FAT_FS
+	this->diskBaseAddress_ = SPIFI_FLASH_DISK_BASE_ADDRESS;
+	this->diskSize_ = SPIFI_FLASH_DISK_SIZE;
+	this->diskBlockSize_ = 1;
+#endif
 #if (USE_CONSOLE && SPIFI_USE_CONSOLE)
 	/* Report the library version to start with */
 	uint16_t libVersion = spifiGetLibVersion();
@@ -123,10 +129,12 @@ Spifi::Spifi(void)
 
 void Spifi::initialize(void)
 {
+	if(this->isInitialized_)
+		return;
 	/* Get some info needed for the application */
 	uint32_t maxSpifiClock = spifiDevGetInfo(Spifi::spifiHandle_, SPIFI_INFO_MAXCLOCK);
 
-#if (USE_CONSOLE && SPIFI_USE_CONSOLE)
+	#if (USE_CONSOLE && SPIFI_USE_CONSOLE)
 	/* Get info */
 	printf("Device Identified   = %s\r\n", spifiDevGetDeviceName((SPIFI_HANDLE_T*)spifiHandle_));
 	printf("Capabilities        = 0x%lx\r\n", spifiDevGetInfo((SPIFI_HANDLE_T*)spifiHandle_, SPIFI_INFO_CAPS));
@@ -141,6 +149,10 @@ void Spifi::initialize(void)
 	printf("Current dev status  = 0x%lx\r\n", spifiDevGetInfo((SPIFI_HANDLE_T*)spifiHandle_, SPIFI_INFO_STATUS));
 	printf("Current options     = %lu\r\n", spifiDevGetInfo((SPIFI_HANDLE_T*)spifiHandle_, SPIFI_INFO_OPTIONS));
 	#endif
+
+	this->auxBlockAddress_ = spifiDevGetInfo((SPIFI_HANDLE_T*)spifiHandle_, SPIFI_INFO_DEVSIZE) -
+			spifiDevGetInfo((SPIFI_HANDLE_T*)spifiHandle_, SPIFI_INFO_ERASE_BLOCKSIZE) +
+			SPIFLASH_BASE_ADDRESS;
 
 	/* SPIFI base clock will be based on the main PLL rate and a divider */
 	uint32_t spifiBaseClockRate = Chip_Clock_GetClockInputHz(CLKIN_MAINPLL);
@@ -163,6 +175,10 @@ void Spifi::initialize(void)
 	/* Enable quad.  If not supported it will be ignored */
 	spifiDevSetOpts(Spifi::spifiHandle_, SPIFI_OPT_USE_QUAD, 1);
 	setMemoryMode();
+	this->isInitialized_ = true;
+	#if USE_FAT_FS
+		this->diskStatus_ &= ~STA_NOINIT;
+	#endif
 }
 
 
@@ -183,7 +199,7 @@ void Spifi::clearMemoryMode(void)
 
 
 
-void Spifi::write(uint32_t address,uint8_t* data, uint32_t size)
+void Spifi::writeFast(uint32_t address,uint8_t* data, uint32_t size)
 {
 	Spifi::clearMemoryMode();
 	uint32_t pageSize = spifiDevGetInfo(Spifi::spifiHandle_, SPIFI_INFO_PAGESIZE);
@@ -191,7 +207,8 @@ void Spifi::write(uint32_t address,uint8_t* data, uint32_t size)
 	uint32_t bw = 0;
 	if(pageOffset != 0) {
 		uint32_t tempSize = pageSize - pageOffset;
-		if(size <= tempSize) tempSize = size;
+		if(size <= tempSize)
+			tempSize = size;
 		SPIFI_ERR_T errCode =
 				spifiDevPageProgram(Spifi::spifiHandle_, address, (uint32_t*)data, tempSize);
 		if (errCode != SPIFI_ERR_NONE)
@@ -212,30 +229,138 @@ void Spifi::write(uint32_t address,uint8_t* data, uint32_t size)
 
 
 
-void Spifi::erase(uint32_t address, uint32_t size)
+int Spifi::copyBlock(uint32_t srcBlockAddress, uint32_t dstBlockAddress,
+		uint32_t offset, uint32_t size)
 {
-	Spifi::clearMemoryMode();
+	uint32_t pageSize = spifiDevGetInfo(Spifi::spifiHandle_, SPIFI_INFO_PAGESIZE);
+	uint32_t srcAddress = srcBlockAddress + offset;
+	uint32_t dstAddress = dstBlockAddress + offset;
+	uint8_t* cache = (uint8_t*)malloc_s(pageSize);
+	if(!cache){
+		#if (USE_CONSOLE && SPIFI_USE_CONSOLE)
+		printf("SPIFI Error: No memory for copyBlock!\n");
+		#endif
+		return -1;
+	}
+	uint32_t pageOffset = offset % pageSize;
+	uint32_t writeSize = pageSize - pageOffset;
+	uint32_t count = size / pageSize;
+	count += (count * pageSize) == size ? 0 : 1;
+	for(uint32_t i = 0; i < count; i++){
+		if(pageOffset){
+			writeSize = (writeSize < size) ? writeSize : size;
+			pageOffset = 0;
+		}
+		else
+			writeSize = (pageSize < size) ? pageSize : size;
+		if(!this->isEmpty(srcAddress, writeSize)){
+			memcpy(cache, (void*)srcAddress, writeSize);
+			Spifi::clearMemoryMode();
+			SPIFI_ERR_T errCode = spifiDevPageProgram(Spifi::spifiHandle_,
+					dstAddress, (uint32_t*)cache, writeSize);
+			if (errCode != SPIFI_ERR_NONE)
+				printErrorString((char*)"QSPI Flash Page write", errCode);
+			Spifi::setMemoryMode();
+		}
+		srcAddress += writeSize;
+		dstAddress += writeSize;
+		size -= writeSize;
+	}
 
-	#if (USE_CONSOLE && SPIFI_USE_CONSOLE)
-	printf("Erasing QSPI Flash...\r\n");
-	#endif
+	free_s(cache);
+	return 0;
+}
 
-	SPIFI_ERR_T errCode = spifiEraseByAddr(Spifi::spifiHandle_, address, (address+size));
-	if (errCode != SPIFI_ERR_NONE)
-		printErrorString((char*)"EraseBlocks", errCode);
 
-	Spifi::setMemoryMode();
 
-	#if (USE_CONSOLE && SPIFI_USE_CONSOLE)
-	printf("Verifying QSPI Flash erased...\r\n");
-	#endif
+void Spifi::writeBlock(uint32_t address,uint8_t* data, uint32_t size)
+{
+	uint32_t blockSize = spifiDevGetInfo((SPIFI_HANDLE_T*)spifiHandle_, SPIFI_INFO_ERASE_BLOCKSIZE);
+	uint32_t blockOffset = address % blockSize;
+	uint32_t blockAddress = address - blockOffset;
+	uint32_t copySecondPartOffset = blockOffset + size;
+	uint32_t copySecondPartSize = 0;
+
+	this->erase(this->auxBlockAddress_, blockSize);
+	if(blockOffset){
+		if(this->copyBlock(blockAddress, this->auxBlockAddress_, 0, blockOffset))
+			return;
+	}
+	if(copySecondPartOffset < blockSize){
+		copySecondPartSize = blockSize - copySecondPartOffset;
+		if(this->copyBlock(blockAddress, this->auxBlockAddress_,
+				copySecondPartOffset, copySecondPartSize)){
+			return;
+		}
+	}
+	this->erase(blockAddress, blockSize);
+	this->writeFast(address, data, size);
+	if(blockOffset)
+		this->copyBlock(this->auxBlockAddress_, blockAddress, 0, blockOffset);
+	if(copySecondPartOffset < blockSize){
+		copySecondPartSize = blockSize - copySecondPartOffset;
+		this->copyBlock(this->auxBlockAddress_, blockAddress,
+				copySecondPartOffset, copySecondPartSize);
+	}
+}
+
+
+
+bool Spifi::isEmpty(uint32_t address, uint32_t size)
+{
 	for (uint32_t idx = 0; idx < size; idx += sizeof(uint32_t)) {
 		if ( ((uint32_t *)address)[(idx >> 2)] != 0xffffffff)
-			printErrorString((char*)"EraseDevice verify", SPIFI_ERR_GEN);
+			return false;
 	}
-	#if (USE_CONSOLE && SPIFI_USE_CONSOLE)
-	printf("Erase Done. Verify OK.\r\n");
-	#endif
+	return true;
+}
+
+
+
+void Spifi::writeMemory(uint32_t address, uint8_t* data, uint32_t size)
+{
+	if(this->isEmpty(address, size)){
+		this->writeFast(address, data, size);
+		return;
+	}
+	uint32_t writeIndex = 0;
+	uint32_t blockSize = spifiDevGetInfo((SPIFI_HANDLE_T*)spifiHandle_, SPIFI_INFO_ERASE_BLOCKSIZE);
+	uint32_t blockOffset = address % blockSize;
+	uint32_t writeSize = blockSize - blockOffset;
+	uint32_t blocksCount = (blockOffset + size) / blockSize;
+	blocksCount += ((blocksCount * blockSize) == (blockOffset + size)) ? 0 : 1;
+	for(uint32_t i = 0; i < blocksCount; i++){
+		if(blockOffset){
+			writeSize = (writeSize < size) ? writeSize : size;
+			blockOffset = 0;
+		}
+		else
+			writeSize = (blockSize < size) ? blockSize : size;
+		this->writeBlock(address, &data[writeIndex], writeSize);
+		size -= writeSize;
+		address += writeSize;
+		writeIndex += writeSize;
+	}
+}
+
+
+
+void Spifi::readMemory(uint32_t address, uint8_t* data, uint32_t size)
+{
+	memcpy(data, (void*)address, size);
+}
+
+
+
+void Spifi::erase(uint32_t address, uint32_t size)
+{
+	if(!size)
+		return;
+	Spifi::clearMemoryMode();
+	SPIFI_ERR_T errCode = spifiEraseByAddr(Spifi::spifiHandle_, address, (address + size - 1));
+	if (errCode != SPIFI_ERR_NONE)
+		printErrorString((char*)"EraseBlocks", errCode);
+	Spifi::setMemoryMode();
 }
 
 

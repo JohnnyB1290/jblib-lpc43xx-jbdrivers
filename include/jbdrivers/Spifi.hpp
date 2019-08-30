@@ -28,21 +28,25 @@
 
 #include "jbkernel/jb_common.h"
 #include "SPIFI/spifilib_api.h"
-
-namespace jblib::jbdrivers
-{
+#include "jbkernel/IVoidMemory.hpp"
 
 #ifndef SPIFLASH_BASE_ADDRESS
 #define SPIFLASH_BASE_ADDRESS (0x14000000)
 #endif
 
-class Spifi
+namespace jblib::jbdrivers
+{
+
+using namespace jbkernel;
+
+
+class Spifi : public IVoidMemory
 {
 public:
 	static Spifi* getSpifi(void);
-	void initialize(void);
-	void write(uint32_t address,uint8_t* data, uint32_t size);
+	virtual void initialize(void);
 	void erase(uint32_t address, uint32_t size);
+	bool isEmpty(uint32_t address, uint32_t size);
 	void deinitialize(void);
 
 private:
@@ -51,11 +55,18 @@ private:
 	static void clearMemoryMode(void);
 	static void printErrorString(char* string, SPIFI_ERR_T errorNumber);
 	static uint32_t calculateDivisor(uint32_t baseClock, uint32_t target);
+	void writeBlock(uint32_t address,uint8_t* data, uint32_t size);
+	int copyBlock(uint32_t srcBlockAddress, uint32_t dstBlockAddress,
+			uint32_t offset, uint32_t size);
+	void writeFast(uint32_t address, uint8_t* data, uint32_t size);
+	virtual void readMemory(uint32_t address, uint8_t* data, uint32_t size);
+	virtual void writeMemory(uint32_t address, uint8_t* data, uint32_t size);
 
 	static Spifi* spifi_;
 	static SPIFI_HANDLE_T* spifiHandle_;
 	static uint32_t* handleMemory_;
 	static const PINMUX_GRP_T spifiPinMuxingGroup_[];
+	uint32_t auxBlockAddress_ = 0;
 };
 
 }
