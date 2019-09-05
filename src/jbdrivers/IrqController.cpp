@@ -106,7 +106,7 @@ void IrqController::deleteIrqListener(IIrqListener* const listener)
 void IrqController::handleIrq(const int irqNumber)
 {
 	for(std::forward_list<ListenersListItem>::iterator it = this->listenersList_.begin();
-			it != this->listenersList_.end(); it++){
+			it != this->listenersList_.end(); ++it){
 		if(it->irqNumber == irqNumber)
 			it->listener->irqHandler(irqNumber);
 	}
