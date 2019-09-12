@@ -281,7 +281,7 @@ void Spifi::writeBlock(uint32_t address,uint8_t* data, uint32_t size)
 	uint32_t copySecondPartOffset = blockOffset + size;
 	uint32_t copySecondPartSize = 0;
 
-	this->erase(this->auxBlockAddress_, blockSize);
+	this->eraseMemory(this->auxBlockAddress_, blockSize);
 	if(blockOffset){
 		if(this->copyBlock(blockAddress, this->auxBlockAddress_, 0, blockOffset))
 			return;
@@ -293,7 +293,7 @@ void Spifi::writeBlock(uint32_t address,uint8_t* data, uint32_t size)
 			return;
 		}
 	}
-	this->erase(blockAddress, blockSize);
+	this->eraseMemory(blockAddress, blockSize);
 	this->writeFast(address, data, size);
 	if(blockOffset)
 		this->copyBlock(this->auxBlockAddress_, blockAddress, 0, blockOffset);
@@ -352,7 +352,7 @@ void Spifi::readMemory(uint32_t address, uint8_t* data, uint32_t size)
 
 
 
-void Spifi::erase(uint32_t address, uint32_t size)
+void Spifi::eraseMemory(uint32_t address, uint32_t size)
 {
 	if(!size)
 		return;

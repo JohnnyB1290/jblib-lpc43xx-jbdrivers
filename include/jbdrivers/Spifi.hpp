@@ -45,7 +45,6 @@ class Spifi : public IVoidMemory
 public:
 	static Spifi* getSpifi(void);
 	virtual void initialize(void);
-	void erase(uint32_t address, uint32_t size);
 	bool isEmpty(uint32_t address, uint32_t size);
 	void deinitialize(void);
 
@@ -61,6 +60,7 @@ private:
 	void writeFast(uint32_t address, uint8_t* data, uint32_t size);
 	virtual void readMemory(uint32_t address, uint8_t* data, uint32_t size);
 	virtual void writeMemory(uint32_t address, uint8_t* data, uint32_t size);
+	virtual void eraseMemory(uint32_t address, uint32_t size);
 
 	static Spifi* spifi_;
 	static SPIFI_HANDLE_T* spifiHandle_;
