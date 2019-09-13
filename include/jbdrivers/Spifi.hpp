@@ -44,9 +44,9 @@ class Spifi : public IVoidMemory
 {
 public:
 	static Spifi* getSpifi(void);
+	static void deleteSpifi(void);
 	virtual void initialize(void);
 	bool isEmpty(uint32_t address, uint32_t size);
-	void deinitialize(void);
 
 private:
 	Spifi(void);

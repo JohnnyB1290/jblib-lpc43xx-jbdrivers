@@ -54,12 +54,28 @@ uint32_t* Spifi::handleMemory_ = (uint32_t*)NULL;
 
 Spifi* Spifi::getSpifi(void)
 {
-	if(Spifi::spifi_ == (Spifi*)NULL)
-		Spifi::spifi_ = new Spifi();
-	if(Spifi::spifiHandle_ == (SPIFI_HANDLE_T*)NULL)
-		return (Spifi*)NULL;
-	else
-		return Spifi::spifi_;
+	if(!spifi_)
+		spifi_ = new Spifi();
+	if(!spifiHandle_){
+		free_s(handleMemory_);
+		handleMemory_ = NULL;
+		delete spifi_;
+		spifi_ = NULL;
+	}
+	return spifi_;
+}
+
+
+
+void Spifi::deleteSpifi(void)
+{
+	if(spifi_){
+		spifiDevDeInit(spifiHandle_);
+		free_s(handleMemory_);
+		handleMemory_ = NULL;
+		delete spifi_;
+		spifi_ = NULL;
+	}
 }
 
 
@@ -122,8 +138,10 @@ Spifi::Spifi(void) : IVoidMemory()
 	     better to use malloc if it is available. */
 	Spifi::spifiHandle_ = spifiInitDevice((void*)Spifi::handleMemory_,
 			memSize, LPC_SPIFI_BASE, this->baseAddress_);
-	if (Spifi::spifiHandle_ == NULL)
+	if (Spifi::spifiHandle_ == NULL){
 		printErrorString((char*)"spifiInitDevice", SPIFI_ERR_GEN);
+		free_s(Spifi::handleMemory_);
+	}
 }
 
 
@@ -362,14 +380,6 @@ void Spifi::eraseMemory(uint32_t address, uint32_t size)
 	if (errCode != SPIFI_ERR_NONE)
 		printErrorString((char*)"EraseBlocks", errCode);
 	Spifi::setMemoryMode();
-}
-
-
-
-void Spifi::deinitialize(void)
-{
-	/* Done, de-init will enter memory mode */
-	spifiDevDeInit(Spifi::spifiHandle_);
 }
 
 
