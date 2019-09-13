@@ -64,8 +64,9 @@ Spifi* Spifi::getSpifi(void)
 
 
 
-Spifi::Spifi(void) : IVoidMemory(SPIFLASH_BASE_ADDRESS)
+Spifi::Spifi(void) : IVoidMemory()
 {
+	this->baseAddress_ = SPIFLASH_BASE_ADDRESS;
 #if USE_FAT_FS
 	this->diskBaseAddress_ = SPIFI_FLASH_DISK_BASE_ADDRESS;
 	this->diskSize_ = SPIFI_FLASH_DISK_SIZE;
@@ -120,7 +121,7 @@ Spifi::Spifi(void) : IVoidMemory(SPIFLASH_BASE_ADDRESS)
 	     a chunk of memory that we know is large enough. It would be
 	     better to use malloc if it is available. */
 	Spifi::spifiHandle_ = spifiInitDevice((void*)Spifi::handleMemory_,
-			memSize, LPC_SPIFI_BASE, SPIFLASH_BASE_ADDRESS);
+			memSize, LPC_SPIFI_BASE, this->baseAddress_);
 	if (Spifi::spifiHandle_ == NULL)
 		printErrorString((char*)"spifiInitDevice", SPIFI_ERR_GEN);
 }
@@ -152,7 +153,7 @@ void Spifi::initialize(void)
 
 	this->auxBlockAddress_ = spifiDevGetInfo((SPIFI_HANDLE_T*)spifiHandle_, SPIFI_INFO_DEVSIZE) -
 			spifiDevGetInfo((SPIFI_HANDLE_T*)spifiHandle_, SPIFI_INFO_ERASE_BLOCKSIZE) +
-			SPIFLASH_BASE_ADDRESS;
+			this->baseAddress_;
 
 	/* SPIFI base clock will be based on the main PLL rate and a divider */
 	uint32_t spifiBaseClockRate = Chip_Clock_GetClockInputHz(CLKIN_MAINPLL);
