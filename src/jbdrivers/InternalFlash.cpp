@@ -60,7 +60,10 @@ InternalFlash::~InternalFlash(void)
 void InternalFlash::initialize(void)
 {
 	if(!this->isInitialized_){
-		uint8_t result = Chip_IAP_Init();
+		#if (USE_CONSOLE && INTERNAL_FLASH_USE_CONSOLE)
+		uint8_t result =
+		#endif
+		Chip_IAP_Init();
 		#if (USE_CONSOLE && INTERNAL_FLASH_USE_CONSOLE)
 		if(result){
 			printf("Internal flash error: Chip_IAP_Init error %u", result);
