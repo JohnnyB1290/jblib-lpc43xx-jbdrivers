@@ -30,6 +30,7 @@
 #include "jbkernel/callback_interfaces.hpp"
 #include "jbdrivers/IrqController.hpp"
 #include "jbkernel/IIpc.hpp"
+#include <forward_list>
 
 namespace jblib::jbdrivers
 {
@@ -64,7 +65,7 @@ private:
     IpcQueue_t* writeQueue_ = NULL;
     IpcMsg_t writeQueueData_[IPC_QUEUE_SIZE];
     uint32_t globalValues_[IPC_NUM_GLOBAL_VALUES];
-    IIpcListener* listeners_[IPC_NUM_LISTENERS];
+    std::forward_list<IIpcListener*> listenersList_;
     IRQn_Type irqN_;
 };
 
