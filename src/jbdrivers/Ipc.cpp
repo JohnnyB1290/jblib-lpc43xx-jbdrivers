@@ -221,6 +221,7 @@ void Ipc::irqHandler(int irqNumber)
 
 int Ipc::pushMsg(uint32_t id, uint32_t data)
 {
+	disableInterrupts();
 	IpcMsg_t msg;
 	#ifdef CORE_M4
 	msg.sender = GATE_CORE_M4;
@@ -234,16 +235,20 @@ int Ipc::pushMsg(uint32_t id, uint32_t data)
 	msg.id = id;
 	msg.data = data;
 
-	if (!IPC_QUEUE_IS_VALID(this->writeQueue_))
+	if (!IPC_QUEUE_IS_VALID(this->writeQueue_)) {
+		enableInterrupts();
 		return IPC_QUEUE_ERROR;
-	if (IPC_QUEUE_IS_FULL(this->writeQueue_))
+	}
+	if (IPC_QUEUE_IS_FULL(this->writeQueue_)) {
+		enableInterrupts();
 		return IPC_QUEUE_FULL;
+	}
 	memcpy(this->writeQueue_->data + (HEAD_INDEX(this->writeQueue_) * this->writeQueue_->itemSize),
 			&msg, this->writeQueue_->itemSize);
 	this->writeQueue_->head++;
 	__DSB(); //Send signal
 	__SEV();
-
+	enableInterrupts();
 	return IPC_QUEUE_INSERT;
 }
 
