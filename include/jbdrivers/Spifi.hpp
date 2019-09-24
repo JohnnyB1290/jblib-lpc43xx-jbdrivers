@@ -46,7 +46,7 @@ public:
 	static Spifi* getSpifi(void);
 	static void deleteSpifi(void);
 	virtual void initialize(void);
-	bool isEmpty(uint32_t address, uint32_t size);
+	virtual bool isEmpty(uint32_t address, uint32_t size);
 
 private:
 	Spifi(void);

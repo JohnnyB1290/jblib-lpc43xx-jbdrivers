@@ -39,13 +39,9 @@ namespace jblib::jbdrivers
 
 using namespace jbkernel;
 
-InternalFlash::InternalFlash(FlashBankNumber_t bankNumber) : IVoidMemory()
+InternalFlash::InternalFlash(void) : IVoidMemory()
 {
-	this->bankNumber_ = bankNumber;
-	if(this->bankNumber_ == FLASH_BANK_A)
-		this->baseAddress_ = FLASH_A_BASE;
-	else
-		this->baseAddress_ = FLASH_B_BASE;
+	this->baseAddress_ = FLASH_A_BASE;
 }
 
 
@@ -114,32 +110,32 @@ void InternalFlash::writeMemory(uint32_t address, uint8_t* data, uint32_t size)
 
 
 
+bool InternalFlash::isEmpty(uint32_t address, uint32_t size)
+{
+	for (uint32_t idx = 0; idx < size; idx += sizeof(uint32_t)) {
+		if ( ((uint32_t *)address)[(idx >> 2)] != 0xffffffff)
+			return false;
+	}
+	return true;
+}
+
+
+
 void InternalFlash::eraseMemory(uint32_t address, uint32_t size)
 {
-	uint32_t pageOffset = address % FLASH_PAGE_SIZE;
-	uint32_t pageAddress = address - pageOffset;
-	while(size){
-		uint8_t sectorNumber = this->getSectorNumber(pageAddress);
-		uint8_t result =
-				Chip_IAP_PreSectorForReadWrite(sectorNumber, sectorNumber, this->bankNumber_);
-		if(result){
-			#if (USE_CONSOLE && INTERNAL_FLASH_USE_CONSOLE)
-			printf("Internal flash error: eraseMemory "
-					"Chip_IAP_PreSectorForReadWrite error %u", result);
-			#endif
-			return;
+	if(!size)
+		return;
+	int bankNumber = this->getBankNumber(address);
+	if(bankNumber < 0)
+		return;
+	uint8_t startSector = this->getSectorNumber(address);
+	uint8_t endSector = this->getSectorNumber(address + size - 1);
+	for(uint8_t i = 0; i < 255; i++) {
+		Chip_IAP_PreSectorForReadWrite(startSector, endSector, bankNumber);
+		Chip_IAP_EraseSector(startSector, endSector, bankNumber);
+		if(Chip_IAP_BlankCheckSector(startSector, endSector, bankNumber) == 0){
+			break;
 		}
-		jblib::jbdrivers::JbController::delayUs(1);
-		result = Chip_IAP_ErasePage(pageAddress, pageAddress);
-		if(result){
-			#if (USE_CONSOLE && INTERNAL_FLASH_USE_CONSOLE)
-			printf("Internal flash error: eraseMemory "
-					"Chip_IAP_ErasePage error %u", result);
-			#endif
-			return;
-		}
-		pageAddress += FLASH_PAGE_SIZE;
-		size = (size < FLASH_PAGE_SIZE) ? 0 : (size - FLASH_PAGE_SIZE);
 	}
 }
 
@@ -148,25 +144,30 @@ void InternalFlash::eraseMemory(uint32_t address, uint32_t size)
 void InternalFlash::eraseProgramPage(uint32_t address, uint8_t* data)
 {
 	uint8_t sectorNumber = this->getSectorNumber(address);
-	uint8_t result =
-			Chip_IAP_PreSectorForReadWrite(sectorNumber, sectorNumber, this->bankNumber_);
-	if(result){
-		#if (USE_CONSOLE && INTERNAL_FLASH_USE_CONSOLE)
-		printf("Internal flash error: eraseProgramPage "
-				"Chip_IAP_PreSectorForReadWrite 1 error %u", result);
-		#endif
+	int bankNumber = this->getBankNumber(address);
+	if(bankNumber < 0)
 		return;
+	uint8_t result = 0;
+	if(!this->isEmpty(address, FLASH_PAGE_SIZE)){
+		result = Chip_IAP_PreSectorForReadWrite(sectorNumber, sectorNumber, bankNumber);
+		if(result){
+			#if (USE_CONSOLE && INTERNAL_FLASH_USE_CONSOLE)
+			printf("Internal flash error: eraseProgramPage "
+					"Chip_IAP_PreSectorForReadWrite 1 error %u", result);
+			#endif
+			return;
+		}
+		jblib::jbdrivers::JbController::delayUs(1);
+		result = Chip_IAP_ErasePage(address, address);
+		if(result){
+			#if (USE_CONSOLE && INTERNAL_FLASH_USE_CONSOLE)
+			printf("Internal flash error: eraseProgramPage "
+					"Chip_IAP_ErasePage error %u", result);
+			#endif
+			return;
+		}
 	}
-	jblib::jbdrivers::JbController::delayUs(1);
-	result = Chip_IAP_ErasePage(address, address);
-	if(result){
-		#if (USE_CONSOLE && INTERNAL_FLASH_USE_CONSOLE)
-		printf("Internal flash error: eraseProgramPage "
-				"Chip_IAP_ErasePage error %u", result);
-		#endif
-		return;
-	}
-	result = Chip_IAP_PreSectorForReadWrite(sectorNumber, sectorNumber, this->bankNumber_);
+	result = Chip_IAP_PreSectorForReadWrite(sectorNumber, sectorNumber, bankNumber);
 	if(result){
 		#if (USE_CONSOLE && INTERNAL_FLASH_USE_CONSOLE)
 		printf("Internal flash error: eraseProgramPage "
@@ -191,36 +192,46 @@ uint8_t InternalFlash::getSectorNumber(uint32_t address)
 	address &= 0x00FFFFFF;
 	if(address < 0x00002000)
 		return 0;
-	else if((address >= 0x00002000) && (address < 0x00004000))
+	else if(address < 0x00004000)
 		return 1;
-	else if((address >= 0x00004000) && (address < 0x00006000))
+	else if(address < 0x00006000)
 		return 2;
-	else if((address >= 0x00006000) && (address < 0x00008000))
+	else if(address < 0x00008000)
 		return 3;
-	else if((address >= 0x00008000) && (address < 0x0000A000))
+	else if(address < 0x0000A000)
 		return 4;
-	else if((address >= 0x0000A000) && (address < 0x0000C000))
+	else if(address < 0x0000C000)
 		return 5;
-	else if((address >= 0x0000C000) && (address < 0x0000E000))
+	else if(address < 0x0000E000)
 		return 6;
-	else if((address >= 0x0000E000) && (address < 0x00010000))
+	else if(address < 0x00010000)
 		return 7;
-	else if((address >= 0x00010000) && (address < 0x00020000))
+	else if(address < 0x00020000)
 		return 8;
-	else if((address >= 0x00020000) && (address < 0x00030000))
+	else if(address < 0x00030000)
 		return 9;
-	else if((address >= 0x00030000) && (address < 0x00040000))
+	else if(address < 0x00040000)
 		return 10;
-	else if((address >= 0x00040000) && (address < 0x00050000))
+	else if(address < 0x00050000)
 		return 11;
-	else if((address >= 0x00050000) && (address < 0x00060000))
+	else if(address < 0x00060000)
 		return 12;
-	else if((address >= 0x00060000) && (address < 0x00070000))
+	else if(address < 0x00070000)
 		return 13;
-	else if((address >= 0x00070000) && (address < 0x00080000))
+	else if(address < 0x00080000)
 		return 14;
 	else return 0;
 }
 
+
+
+int InternalFlash::getBankNumber(uint32_t address)
+{
+	if((address&0xFF000000) == FLASH_A_BASE)
+		return IAP_FLASH_BANK_A;
+	if((address&0xFF000000) == FLASH_B_BASE)
+		return IAP_FLASH_BANK_B;
+	return -1;
+}
 
 }

@@ -37,15 +37,10 @@ using namespace jbkernel;
 class InternalFlash : public IVoidMemory
 {
 public:
-	typedef enum
-	{
-		FLASH_BANK_A = IAP_FLASH_BANK_A,
-		FLASH_BANK_B = IAP_FLASH_BANK_B,
-	}FlashBankNumber_t;
-
-	InternalFlash(FlashBankNumber_t bankNumber);
+	InternalFlash(void);
 	~InternalFlash(void);
 	virtual void initialize(void);
+	virtual bool isEmpty(uint32_t address, uint32_t size);
 
 private:
 	virtual void readMemory(uint32_t address, uint8_t* data, uint32_t size);
@@ -53,8 +48,7 @@ private:
 	virtual void eraseMemory(uint32_t address, uint32_t size);
 	uint8_t getSectorNumber(uint32_t address);
 	void eraseProgramPage(uint32_t address, uint8_t* data);
-
-	FlashBankNumber_t bankNumber_ = FLASH_BANK_A;
+	int getBankNumber(uint32_t address);
 };
 
 }
