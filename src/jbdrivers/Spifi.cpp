@@ -70,6 +70,7 @@ Spifi* Spifi::getSpifi(void)
 void Spifi::deleteSpifi(void)
 {
 	if(spifi_){
+		spifi_->disableCache();
 		spifiDevDeInit(spifiHandle_);
 		free_s(handleMemory_);
 		handleMemory_ = NULL;

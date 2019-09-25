@@ -48,7 +48,7 @@ InternalFlash::InternalFlash(void) : IVoidMemory()
 
 InternalFlash::~InternalFlash(void)
 {
-
+	this->disableCache();
 }
 
 
