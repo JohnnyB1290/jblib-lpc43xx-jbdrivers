@@ -93,8 +93,17 @@ void IrqController::addIrqListener(IIrqListener* const listener, int irqNumber)
 
 void IrqController::deleteIrqListener(IIrqListener* const listener)
 {
-	this->listenersList_.remove_if([listener](ListenersListItem item){
-		if(listener == item.listener)
+	ListenersListItem newItem;
+	newItem.listener = listener;
+	this->listenersDeleteList_.push_front(newItem);
+}
+
+
+
+void IrqController::deleteIrqListener(ListenersListItem& listenerItem)
+{
+	this->listenersList_.remove_if([listenerItem](ListenersListItem item){
+		if(listenerItem.listener == item.listener)
 			return true;
 		else
 			 return false;
@@ -109,6 +118,13 @@ void IrqController::handleIrq(const int irqNumber)
 			it != this->listenersList_.end(); ++it){
 		if(it->irqNumber == irqNumber)
 			it->listener->irqHandler(irqNumber);
+	}
+	if(!this->listenersDeleteList_.empty()){
+		for(std::forward_list<ListenersListItem>::iterator it = this->listenersDeleteList_.begin();
+				it != this->listenersDeleteList_.end(); ++it){
+			this->deleteIrqListener(*it);
+		}
+		this->listenersDeleteList_.clear();
 	}
 }
 

@@ -66,6 +66,7 @@ private:
     IpcMsg_t writeQueueData_[IPC_QUEUE_SIZE];
     uint32_t globalValues_[IPC_NUM_GLOBAL_VALUES];
     std::forward_list<IIpcListener*> listenersList_;
+    std::forward_list<IIpcListener*> listenersDeleteList_;
     IRQn_Type irqN_;
 };
 

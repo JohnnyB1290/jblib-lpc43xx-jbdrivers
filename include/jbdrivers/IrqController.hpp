@@ -58,15 +58,18 @@ public:
 	void handleIrq(const int irqNumber);
 
 private:
-	IrqController(void);
-
-	static IrqController* irqController_;
 	typedef struct
 	{
 		IIrqListener* listener = NULL;
 		int irqNumber = 0;
 	}ListenersListItem;
+
+	IrqController(void);
+	void deleteIrqListener(ListenersListItem& listenerItem);
+
+	static IrqController* irqController_;
 	std::forward_list<ListenersListItem> listenersList_;
+	std::forward_list<ListenersListItem> listenersDeleteList_;
 };
 
 }

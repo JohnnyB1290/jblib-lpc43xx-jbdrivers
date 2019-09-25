@@ -171,12 +171,7 @@ void Ipc::addIpcListener(IIpcListener* listener)
 
 void Ipc::deleteIpcListener(IIpcListener* listener)
 {
-	this->listenersList_.remove_if([listener](IIpcListener* item){
-		if(listener == item)
-			return true;
-		else
-			 return false;
-	});
+	this->listenersDeleteList_.push_front(listener);
 }
 
 
@@ -212,6 +207,19 @@ void Ipc::irqHandler(int irqNumber)
 				if(((listener->getCode()) >> msg.id) & 1){
 					listener->handleIpcMsg(&msg);
 				}
+			}
+			if(!this->listenersDeleteList_.empty()){
+				for(std::forward_list<IIpcListener*>::iterator it = this->listenersDeleteList_.begin();
+						it != this->listenersDeleteList_.end(); ++it){
+					IIpcListener* listener = *it;
+					this->listenersList_.remove_if([listener](IIpcListener* item){
+						if(listener == item)
+							return true;
+						else
+							 return false;
+					});
+				}
+				this->listenersDeleteList_.clear();
 			}
 		}
 	}
