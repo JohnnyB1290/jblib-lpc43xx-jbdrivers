@@ -42,9 +42,11 @@ public:
 	static void gpioOn(uint8_t number);
 	static void gpioOff(uint8_t number);
 	static void gpioTgl(uint8_t number);
+	static bool getGpio(uint8_t number);
 
 protected:
-	static BoardGpio_t boardGpios_[];
+	static BoardGpio_t boardOutputGpios_[];
+	static BoardGpio_t boardInputGpios_[];
 };
 
 }

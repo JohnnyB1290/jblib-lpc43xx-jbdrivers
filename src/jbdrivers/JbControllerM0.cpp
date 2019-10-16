@@ -32,7 +32,8 @@ namespace jblib::jbdrivers
 
 using namespace jbkernel;
 
-BoardGpio_t JbController::boardGpios_[] = JBCONTROLLER_BOARD_GPIOS;
+BoardGpio_t JbController::boardOutputGpios_[] = JBCONTROLLER_BOARD_OUTPUT_GPIOS;
+BoardGpio_t JbController::boardInputGpios_[] = JBCONTROLLER_BOARD_INPUT_GPIOS;
 
 
 
@@ -51,7 +52,7 @@ void JbController::initialize(void)
 void JbController::gpioOn(uint8_t number)
 {
 	Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT,
-			boardGpios_[number].gpioPort, boardGpios_[number].gpioPin);
+			boardOutputGpios_[number].gpioPort, boardOutputGpios_[number].gpioPin);
 }
 
 
@@ -59,7 +60,7 @@ void JbController::gpioOn(uint8_t number)
 void JbController::gpioOff(uint8_t number)
 {
 	Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT,
-			boardGpios_[number].gpioPort, boardGpios_[number].gpioPin);
+			boardOutputGpios_[number].gpioPort, boardOutputGpios_[number].gpioPin);
 }
 
 
@@ -67,7 +68,15 @@ void JbController::gpioOff(uint8_t number)
 void JbController::gpioTgl(uint8_t number)
 {
 	Chip_GPIO_SetPinToggle(LPC_GPIO_PORT,
-			boardGpios_[number].gpioPort, boardGpios_[number].gpioPin);
+			boardOutputGpios_[number].gpioPort, boardOutputGpios_[number].gpioPin);
+}
+
+
+
+bool JbController::getGpio(uint8_t number)
+{
+	return Chip_GPIO_GetPinState(LPC_GPIO_PORT,
+			boardInputGpios_[number].gpioPort, boardInputGpios_[number].gpioPin);
 }
 
 }
