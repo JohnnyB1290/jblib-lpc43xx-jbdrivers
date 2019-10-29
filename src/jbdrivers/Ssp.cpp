@@ -58,21 +58,21 @@ Ssp::Ssp(uint8_t number)
 
 
 
-void Ssp::initilize(uint32_t bitrate)
+void Ssp::initialize(uint32_t bitrate)
 {
-	this->initilize(bitrate, (BoardGpio_t*)NULL, 0);
+	this->initialize(bitrate, (BoardGpio_t*)NULL, 0);
 }
 
 
 
-void Ssp::initilize(uint32_t bitrate, BoardGpio_t* sSelGpio)
+void Ssp::initialize(uint32_t bitrate, BoardGpio_t* sSelGpio)
 {
-	this->initilize(bitrate, sSelGpio, 1);
+	this->initialize(bitrate, sSelGpio, 1);
 }
 
 
 
-void Ssp::initilize(uint32_t bitrate, SspSlaveSelectType_t sSelType)
+void Ssp::initialize(uint32_t bitrate, SspSlaveSelectType_t sSelType)
 {
 	if(sSelType == SSEL_TYPE_GPIO) {
 		BoardGpio_t* tempIODescPtr =
@@ -92,18 +92,18 @@ void Ssp::initilize(uint32_t bitrate, SspSlaveSelectType_t sSelType)
 				tempIODescPtr->gpioPin = 	SSP_1_SSEL_GPIO_PIN;
 				tempIODescPtr->scuMode = 	SSP_1_SSEL_SCU_MODE;
 			}
-			this->initilize(bitrate, tempIODescPtr, 1);
+			this->initialize(bitrate, tempIODescPtr, 1);
 		}
 		else
 			return;
 	}
 	else
-		this->initilize(bitrate, (BoardGpio_t*)NULL, 0);
+		this->initialize(bitrate, (BoardGpio_t*)NULL, 0);
 }
 
 
 
-void Ssp::initilize(uint32_t bitrate,
+void Ssp::initialize(uint32_t bitrate,
 		BoardGpio_t* sSelGpios, uint32_t sSelSize)
 {
 	this->sSelGpios_ = sSelGpios;
@@ -264,7 +264,7 @@ void Ssp::txRxFrames(uint32_t framesCount, void** txDataPointers, void** rxDataP
 
 
 
-void Ssp::deinitilize(void)
+void Ssp::deinitialize(void)
 {
 	Chip_RGU_TriggerReset(this->resetNumbers_[this->number_]);
 	while (Chip_RGU_InReset(this->resetNumbers_[this->number_])) {}

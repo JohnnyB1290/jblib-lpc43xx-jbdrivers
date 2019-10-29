@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief SSP Driver Description
+ * @brief SPI Driver Description
  *
  *
  * @note
@@ -23,56 +23,38 @@
  * This file is a part of JB_Lib.
  */
 
-#ifndef SSP_HPP_
-#define SSP_HPP_
+#ifndef JBDRIVERS_SPI_HPP_
+#define JBDRIVERS_SPI_HPP_
 
 #include "jbkernel/jb_common.h"
-
-#if !defined SSP_NUM_MODULES
-#define SSP_NUM_MODULES			2
-#endif
 
 namespace jblib::jbdrivers
 {
 
-typedef enum
-{
-	SSEL_TYPE_HARDWARE = 0,
-	SSEL_TYPE_GPIO = 1,
-}SspSlaveSelectType_t;
-
-
-
-class Ssp
+class Spi
 {
 public:
-	static Ssp* getSsp(uint8_t number);
-	void initialize(uint32_t bitrate);
+	static Spi* getSpi(void);
 	void initialize(uint32_t bitrate, BoardGpio_t* sSelGpio);
-	void initialize(uint32_t bitrate, SspSlaveSelectType_t sSelType);
 	void initialize(uint32_t bitrate,
 			BoardGpio_t* sSelGpios, uint32_t sSelSize);
-	void enable(void);
-	void disable(void);
 	uint16_t txRxFrame(uint16_t data);
 	uint16_t txRxFrame(uint16_t data, uint32_t deviceNumber);
 	uint32_t txRxFrame(void* txData, void* rxData, uint32_t length);
 	uint32_t txRxFrame(void* txData, void* rxData, uint32_t length, uint32_t deviceNumber);
 	void txRxFrames(uint32_t framesCount, void** txDataPointers, void** rxDataPointers, uint32_t* lengthArray, uint32_t deviceNumber);
-
 	void deinitialize(void);
 
 private:
-	Ssp(uint8_t number);
+	Spi(void);
 
-	static Ssp* ssps_[SSP_NUM_MODULES];
-	static LPC_SSP_T* lpcSsps_[];
-	static const CHIP_RGU_RST_T resetNumbers_[];
-	uint8_t number_ = 0;
+	static Spi* spi_;
+	static LPC_SPI_T* lpcSpi_;
+	static constexpr CHIP_RGU_RST_T resetNumber_ = RGU_SPI_RST;
 	BoardGpio_t* sSelGpios_ = NULL;
 	uint32_t sSelSize_ = 0;
 };
 
 }
 
-#endif /* SSP_HPP_ */
+#endif /* JBDRIVERS_SPI_HPP_ */
