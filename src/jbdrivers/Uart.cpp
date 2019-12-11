@@ -129,7 +129,7 @@ void Uart::initialize(void* (* const mallocFunc)(size_t),
 		Chip_SCU_PinMuxSet(Uart::txPorts_[this->number_], Uart::txPins_[this->number_],
 				(SCU_MODE_INACT | Uart::txScuModes_[this->number_]));
 		Chip_SCU_PinMuxSet(Uart::rxPorts_[this->number_], Uart::rxPins_[this->number_],
-				(SCU_MODE_PULLDOWN | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS |
+				(SCU_MODE_PULLUP | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS |
 						Uart::rxScuModes_[this->number_]));
 
 		Chip_UART_Init(Uart::lpcUarts_[this->number_]);
@@ -140,11 +140,11 @@ void Uart::initialize(void* (* const mallocFunc)(size_t),
 		/* Enable receive data and line status interrupt */
 		Chip_UART_IntEnable(Uart::lpcUarts_[this->number_], UART_IER_RBRINT);
 		Chip_UART_TXEnable(Uart::lpcUarts_[this->number_]);
+		this->initialized_ = true;
 		IrqController::getIrqController()->setPriority(uartIrqNs_[this->number_],
 				uartInterruptPriorities_[this->number_]);
 		IrqController::getIrqController()->
 				enableInterrupt(uartIrqNs_[this->number_]);
-		this->initialized_ = true;
 	}
 }
 
@@ -154,21 +154,27 @@ void Uart::irqHandler(int irqNumber)
 {
 	static uint8_t byte = 0;
 	if(this->initialized_) {
-		if (Uart::lpcUarts_[this->number_]->IER & UART_IER_THREINT) {
-			Chip_UART_TXIntHandlerRB(Uart::lpcUarts_[this->number_], (RINGBUFF_T*)&(this->txRingBuffer_));
-
-			/* Disable transmit interrupt if the ring buffer is empty */
-			if (RingBuffer_IsEmpty((RINGBUFF_T*)&(this->txRingBuffer_))) {
-				Chip_UART_IntDisable(Uart::lpcUarts_[this->number_], UART_IER_THREINT);
-				if(this->trEnableGpio_)
-					Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT,
-							this->trEnableGpio_->gpioPort, this->trEnableGpio_->gpioPin);
+		while(Chip_UART_ReadIntIDReg(Uart::lpcUarts_[this->number_]) & UART_IIR_INTID_RDA){
+			byte = Chip_UART_ReadByte(Uart::lpcUarts_[this->number_]);
+			if(this->callback_){
+				this->callback_->channelCallback(&byte, 1, (void*)this, NULL);
 			}
 		}
-		while(Chip_UART_ReadLineStatus(Uart::lpcUarts_[this->number_]) & UART_LSR_RDR) {
-			byte = Chip_UART_ReadByte(Uart::lpcUarts_[this->number_]);
-			if(this->callback_)
-				this->callback_->channelCallback(&byte, 1, (void*)this, NULL);
+		if (Uart::lpcUarts_[this->number_]->IER & UART_IER_THREINT) {
+			if(Chip_UART_ReadIntIDReg(Uart::lpcUarts_[this->number_]) & UART_IIR_INTID_THRE){
+				while ((Chip_UART_ReadLineStatus(Uart::lpcUarts_[this->number_]) & UART_LSR_THRE) != 0 &&
+					   RingBuffer_Pop((RINGBUFF_T*)&(this->txRingBuffer_), &byte)) {
+					Chip_UART_SendByte(Uart::lpcUarts_[this->number_], byte);
+				}
+				/* Disable transmit interrupt if the ring buffer is empty */
+				if (RingBuffer_IsEmpty((RINGBUFF_T*)&(this->txRingBuffer_))) {
+					Chip_UART_IntDisable(Uart::lpcUarts_[this->number_], UART_IER_THREINT);
+					if(this->trEnableGpio_){
+						Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT,
+								this->trEnableGpio_->gpioPort, this->trEnableGpio_->gpioPin);
+					}
+				}
+			}
 		}
 	}
 }
@@ -198,13 +204,15 @@ Uart::~Uart(void)
 void Uart::tx(uint8_t* const buffer, const uint16_t size, void* parameter)
 {
 	if(this->initialized_) {
-		if(this->trEnableGpio_)
+		if(this->trEnableGpio_){
 			Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT,
 					this->trEnableGpio_->gpioPort, this->trEnableGpio_->gpioPin);
+		}
 		Chip_UART_SendRB(Uart::lpcUarts_[this->number_],
 				(RINGBUFF_T*)&(this->txRingBuffer_), buffer, size);
-		if(this->trEnableGpio_)
+		if(this->trEnableGpio_){
 			RingBuffer_InsertMult((RINGBUFF_T*)&(this->txRingBuffer_), &(this->rs485Dummy_), 1);
+		}
 	}
 }
 
