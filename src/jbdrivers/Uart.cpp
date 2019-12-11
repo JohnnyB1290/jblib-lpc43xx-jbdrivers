@@ -161,18 +161,16 @@ void Uart::irqHandler(int irqNumber)
 			}
 		}
 		if (Uart::lpcUarts_[this->number_]->IER & UART_IER_THREINT) {
-			if(Chip_UART_ReadIntIDReg(Uart::lpcUarts_[this->number_]) & UART_IIR_INTID_THRE){
-				while ((Chip_UART_ReadLineStatus(Uart::lpcUarts_[this->number_]) & UART_LSR_THRE) != 0 &&
-					   RingBuffer_Pop((RINGBUFF_T*)&(this->txRingBuffer_), &byte)) {
-					Chip_UART_SendByte(Uart::lpcUarts_[this->number_], byte);
-				}
-				/* Disable transmit interrupt if the ring buffer is empty */
-				if (RingBuffer_IsEmpty((RINGBUFF_T*)&(this->txRingBuffer_))) {
-					Chip_UART_IntDisable(Uart::lpcUarts_[this->number_], UART_IER_THREINT);
-					if(this->trEnableGpio_){
-						Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT,
-								this->trEnableGpio_->gpioPort, this->trEnableGpio_->gpioPin);
-					}
+			while ((Chip_UART_ReadLineStatus(Uart::lpcUarts_[this->number_]) & UART_LSR_THRE) != 0 &&
+				   RingBuffer_Pop((RINGBUFF_T*)&(this->txRingBuffer_), &byte)) {
+				Chip_UART_SendByte(Uart::lpcUarts_[this->number_], byte);
+			}
+			/* Disable transmit interrupt if the ring buffer is empty */
+			if (RingBuffer_IsEmpty((RINGBUFF_T*)&(this->txRingBuffer_))) {
+				Chip_UART_IntDisable(Uart::lpcUarts_[this->number_], UART_IER_THREINT);
+				if(this->trEnableGpio_){
+					Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT,
+							this->trEnableGpio_->gpioPort, this->trEnableGpio_->gpioPin);
 				}
 			}
 		}
