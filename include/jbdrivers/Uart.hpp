@@ -35,6 +35,11 @@
 #define UARTS_NUM			4
 #endif
 
+typedef enum {
+	Uart_TxBufferPointer,
+	Uart_TxBufferSize,
+} UartParams;
+
 namespace jblib::jbdrivers
 {
 

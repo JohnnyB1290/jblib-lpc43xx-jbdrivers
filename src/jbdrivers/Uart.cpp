@@ -117,11 +117,11 @@ void Uart::initialize(void* (* const mallocFunc)(size_t),
 		const uint16_t txBufferSize, IChannelCallback* const callback)
 {
 	if(!this->initialized_) {
-		if(txBufferSize == 0)
-			return;
-		this->txBufferSize_ = txBufferSize;
-		this->txBuffer_ = (uint8_t*)mallocFunc(this->txBufferSize_);
-		if(this->txBuffer_ == (uint8_t*)NULL)
+		if(txBufferSize != 0) {
+			this->txBufferSize_ = txBufferSize;
+			this->txBuffer_ = (uint8_t*)mallocFunc(this->txBufferSize_);
+		}
+		if(!this->txBuffer_ || !this->txBufferSize_)
 			return;
 		this->callback_ = callback;
 		RingBuffer_Init(&(this->txRingBuffer_), this->txBuffer_, 1, this->txBufferSize_);
@@ -225,7 +225,12 @@ void Uart::getParameter(const uint8_t number, void* const value)
 
 void Uart::setParameter(const uint8_t number, void* const value)
 {
-
+	if(number == Uart_TxBufferPointer) {
+		this->txBuffer_ = (uint8_t*) value;
+	}
+	if(number == Uart_TxBufferSize) {
+		this->txBufferSize_ = (uint32_t) value;
+	}
 }
 
 }
